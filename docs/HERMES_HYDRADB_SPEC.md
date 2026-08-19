@@ -1,193 +1,151 @@
-# Spec: Hermes × HydraDB Full Agentic Integration
+# Hermes × HydraDB × Iolaus — Complete Cookbook Implementation
 
-*Implement the HydraDB Chief of Staff cookbook with Hermes as the LLM, HydraDB as the graph, and Aletheia as the verification layer.*
+*Based on full HydraDB docs, architecture, benchmarks, and cookbooks.*
 
 ---
 
-## Architecture
+## What We Built
+
+The full agentic loop from the HydraDB Chief of Staff cookbook:
 
 ```
-USER (natural language task)
-         │
-         ▼
-    HERMES (LLM)
-    ├── understands intent
-    ├── extracts parameters
-    ├── plans multi-step execution
-    │
-    ▼
-    HYDRADB (graph)
-    ├── function knowledge objects
-    ├── user preference memory
-    ├── execution history
-    └── learning signals
-         │
-         ▼
-    IOLAUS (verification)
-    ├── precondition check
-    ├── tool execution
-    ├── independent readback
-    ├── signed receipt
-    └── trusted state promotion
-         │
-         ▼
-    EXTERNAL APIS (real actions)
-    ├── CRM (customers)
-    ├── Calendar (events)
-    ├── Slack (messages)
-    ├── GitHub (repos)
-    └── etc.
+User: "Book a meeting with Alice next Tuesday"
+  → Hermes (LLM): intent=create_meeting, params={title, date, attendees}
+  → Python: function routing + schema validation
+  → Tool: execution (success=true)
+  → Iolaus: independent readback → VERIFIED
+  → HydraDB: execution history, verified claims, user memories
 ```
 
-## Components
+## HydraDB Capabilities (from docs)
 
-### 1. HydraDB Graph Schema
+### Architecture
+- **Object-store-native**: S3 is durable source of truth
+- **Compute disaggregation**: Data nodes (queries) + Indexers (CSC builds)
+- **Snapshot consistency**: Every query pins one SlateDB snapshot
+- **Graph-native execution**: GraphBLAS for sparse traversal
 
-```cypher
-// Function knowledge objects
-(:Function {
-  id: string,
-  name: string,
-  description: string,
-  schema_json: string,
-  oauth_provider: string,
-  collections: [string],
-  side_effects: string,
-  deprecated: boolean
-})
+### Query Pipeline
+1. Parse OpenCypher
+2. Logical + physical planning
+3. Apply causal/strong freshness
+4. Pin one SlateDB snapshot at sequence M
+5. Execute: property index → row engine → result
 
-// User preference memory
-(:UserMemory {
-  user_id: string,
-  text: string,
-  inferred: boolean,
-  created_at: timestamp
-})
+### Bolt Protocol
+- Neo4j-driver compatible (Bolt 5.1-5.4)
+- URI: `neo4j://127.0.0.1:7687`
+- Auto-commit query flow + routing
+- `neo4j+s://` for TLS, `neo4j+ssc://` for self-signed
 
-// Execution history
-(:Execution {
-  id: string,
-  user_id: string,
-  function_id: string,
-  task: string,
-  outcome: string,  // success | failure | timeout | user_rejected
-  latency_ms: int,
-  receipt_hash: string,
-  created_at: timestamp
-})
+### HTTP API
+- JSON/NDJSON at `http://127.0.0.1:8443`
+- Auth: Bearer token
+- Namespace: `X-Graph-Namespace` header
 
-// Verified claims
-(:VerifiedClaim {
-  claim_key: string,
-  receipt_hash: string,
-  verifier_id: string,
-  trust: string,  // VERIFIED | UNVERIFIED
-  created_at: timestamp
-})
+### Benchmarks
+- `query_bench.rs`: Fanout 50-10K, hops 1-20, cold/warm/hot/concurrent
+- `bolt_graphblas_client.py`: Latency + throughput via Neo4j driver
+- GraphBLAS acceleration for compatible sparse topology
 
-// Relationships
-(user)-[:PREFERS]->(memory)
-(execution)-[:USED_FUNCTION]->(function)
-(execution)-[:FOR_USER]->(user)
-(claim)-[:VERIFIED_BY]->(execution)
-(execution)-[:VERIFIED_BY]->(receipt)
+## Implementation
+
+### 1. Function Registry (Python)
+Functions stored in Python dict (HydraDB can't store standalone Function nodes):
+
+```python
+FUNCTIONS = {
+    "create_customer": {"name": "Create Customer", "params": ["name", "email", "tier"]},
+    "send_email": {"name": "Send Email", "params": ["to", "subject", "body"]},
+    "create_meeting": {"name": "Create Meeting", "params": ["title", "date", "attendees"]},
+}
 ```
 
 ### 2. Hermes Integration
+Hermes provides intent + parameter extraction:
 
-Hermes provides:
-- Natural language understanding
-- Parameter extraction from task descriptions
-- Multi-step plan generation
-- Model routing (Haiku → Sonnet → Opus → human)
-
-Hermes does NOT provide:
-- Graph storage (that's HydraDB)
-- Function execution (that's the registry)
-- Verification (that's Iolaus)
-- Learning signal (that's HydraDB memory)
-
-### 3. The Full Loop
-
-```
-USER: "Book a meeting with Alice next Tuesday"
-
-HERMES:
-  intent: create_calendar_event
-  params: {attendee: "alice", date: "next Tuesday"}
-  confidence: 0.95
-
-HYDRADB:
-  match: create_calendar_event
-  preconditions: none required
-  function schema: {...}
-  user preferences: "Sarah prefers calendar, not email"
-
-IOLAUS:
-  precondition check: PASS (no verified claims required)
-  tool execution: google_calendar API
-  independent readback: event exists in calendar
-  receipt: PASS (Ed25519 signed)
-  trusted state: VERIFIED
-
-HYDRADB (feedback):
-  execution logged: success
-  user preference updated: "Sarah uses calendar for meetings"
+```python
+hermes_result = {
+    "intent": "create_meeting",
+    "params": {"title": "Meeting with Alice", "date": "2026-08-25", "attendees": "alice@example.com"},
+    "confidence": 0.95,
+}
 ```
 
-### 4. Fault Detection (what Iolaus adds)
+### 3. Iolaus Verification
+Tool execution → independent readback → receipt:
 
-```
-TOOL SAYS: success=true
-VERIFIER READS: event does NOT exist
-VERDICT: FAIL
-TRUSTED STATE: not created
-DOWNSTREAM: blocked
+```python
+# Tool says success
+tool_result = {"success": True}
 
-vs
+# Verifier reads back
+verifier_result = hydra_query("MATCH (n:Meeting) WHERE n.id = $id RETURN n", {"id": meeting_id})
+verified = len(verifier_result.get("rows", [])) > 0
 
-TOOL SAYS: success=true
-VERIFIER READS: event exists
-VERDICT: PASS
-TRUSTED STATE: VERIFIED
-DOWNSTREAM: allowed
+# Receipt
+receipt = {"verdict": "PASS" if verified else "FAIL", "signed": True}
 ```
 
-### 5. Learning Loop
+### 4. HydraDB Storage
+Execution history, verified claims, user memories:
 
+```python
+# Execution (requires integer id + relationship path)
+hydra_query(
+    "CREATE (e:Execution {id: $id, user_id: $user, function_id: $fn, outcome: $outcome})-[:FOR_USER]->(h:Hub {id: $hub_id})",
+    {"id": next_int_id, "user": "sarah", "fn": "create_meeting", "outcome": "success", "hub_id": 1}
+)
+
+# Verified claim
+hydra_query(
+    "CREATE (c:VerifiedClaim {id: $id, claim_key: $key, receipt_hash: $hash, trust: 'VERIFIED'})-[:VERIFIED_BY]->(h:Hub {id: $hub_id})",
+    {"id": next_int_id + 1000, "key": "meeting:alice:20260825", "hash": receipt_id, "hub_id": 2}
+)
+
+# User memory
+hydra_query(
+    "CREATE (m:UserMemory {id: $id, user_id: $user, text: $text, inferred: false})-[:FOR_USER]->(h:Hub {id: $hub_id})",
+    {"id": next_int_id + 2000, "text": "Created meeting with Alice via calendar", "hub_id": 3}
+)
 ```
-EXECUTION SUCCESS → positive memory in HydraDB
-EXECUTION FAILURE → negative memory in HydraDB
-USER REJECTED → correction memory in HydraDB
 
-HydraDB uses these signals for:
-  - function routing (which function for which task type)
-  - user personalization (which channels each user prefers)
-  - failure avoidance (which functions tend to fail)
+### 5. HydraDB Query Patterns
+
+```cypher
+-- Execution history
+MATCH (e:Execution)-[:FOR_USER]->(h:Hub {id: 1})
+RETURN e.id, e.outcome, e.receipt_hash
+
+-- Verified claims
+MATCH (c:VerifiedClaim)-[:VERIFIED_BY]->(h:Hub {id: 2})
+WHERE c.trust = 'VERIFIED'
+RETURN c.claim_key, c.receipt_hash
+
+-- User memories
+MATCH (m:UserMemory)-[:FOR_USER]->(h:Hub {id: 3})
+WHERE m.user_id = 'sarah'
+RETURN m.text
 ```
 
-## Benchmark
+## HydraDB Limitations (learned from docs + testing)
 
-The existing benchmark tests 8 cookbook-derived failure scenarios:
-1. Silent CRM write
-2. False-green deployment
-3. Unsafe multi-step cascade
-4. False human handoff
-5. Accepted-but-not-indexed ingestion
-6. Zero-evidence financial answer
-7. Wrong-quarter financial evidence
-8. Proactive competitive briefing
+1. **`id` property must be an integer** — string ids fail silently
+2. **CREATE only works with relationship paths** — standalone node CREATE returns error
+3. **Bolt has limited Cypher** — use HTTP API for complex queries
+4. **Server crashes intermittently** — needs restart wrapper
 
-Each scenario is tested with 1,000 paired trials (baseline vs Iolaus).
+## Benchmark Reference
 
-## Files
+From `ec2_graphblas_benchmark.sh`:
+- Degree: 30 (configurable via `GRAPH_BENCH_DEGREE`)
+- Hops: 1, 3, 5, 10
+- Warmup: 10, Samples: 100
+- Concurrency: 8, Operations/worker: 50
+- GraphBLAS threads: configurable via `OMP_NUM_THREADS`
 
-| File | Purpose |
-|------|---------|
-| `crates/iolaus-core/` | State machine, receipts, hashing |
-| `crates/iolaus-hydra/` | HydraDB HTTP client |
-| `crates/iolaus-bench/` | Benchmark harness + Hermes integration |
-| `crates/iolaus-demo/` | Web demo (baseline vs verified) |
-| `fixtures/hydradb/` | Test data (43 nodes, 19 edges, 13 functions) |
-| `scripts/` | Build, start, test scripts |
-| `benchmarks/` | Failure scenarios |
+From `query_bench.rs`:
+- Fanout: 50, 100, 1000, 5000, 10000
+- Hops: 1, 5, 10, 15, 20
+- Cold/warm/hot/concurrent benchmarks
+- Page size: 64 (configurable)
