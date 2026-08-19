@@ -1,80 +1,27 @@
-# Submission — MemoryProof + WigglyMem
+# HydraBite — Hack Hydra submission
 
-**Track:** 03 — Memory + Context Retrieval
-**Prize:** $5,000
+**Verified state transitions for AI agents.**
 
----
+HydraDB already gives action-capable agents a strong function-selection loop: register functions as knowledge, decide what to call, execute through an orchestrator, then feed outcomes back so future decisions improve.
 
-## 1. The Solution
+HydraBite targets one missing boundary in that loop:
 
-### 1.1 Overall
+> **A tool saying “success” is not proof that the intended state transition occurred.**
 
-MemoryProof + WigglyMem is a two-part system for graph memory:
+A CRM API can silently fail. A deployment command can exit 0 before the service is healthy. A coding agent can say “fixed” while tests fail. If optimistic outputs are immediately treated as trusted history, future agent decisions learn from false state.
 
-1. **WigglyMem** — A working memory system built on HydraDB that stores verified scholarly evidence as knowledge sources with graph-enriched recall.
+HydraBite changes one rule:
 
-2. **MemoryProof** — A benchmark suite that proves whether graph memory actually works, using Wiggly's verified corpus as ground truth.
+> **No receipt → no trusted transition.**
 
-Together: **"We built memory AND proved it works."**
+Every action has a small contract: verified claims it requires, claims it may produce, and the verifier(s) authorized to certify it. Execution results are written to HydraDB only as `SUCCEEDED_UNVERIFIED` observations. An independent verifier then checks the declared postcondition. HydraBite signs and stores the verifier evidence. Only a PASS receipt can create a trusted `HBClaim`, and only those claims can enable downstream actions.
 
-**Problem:** Agent memory systems retrieve plausible context. Nobody systematically tests whether it's correct, attributable, or consistent.
+The live demo deliberately uses a lying tool that returns `success=true` without creating the requested CRM record. HydraBite rejects it, creates no trusted claim, and blocks the downstream welcome email. The same action succeeds after a deterministic readback proves the record exists.
 
-**Audience:** Developers building agent memory, researchers needing reproducible context, anyone using HydraDB.
+The project uses the **HydraDB OSS graph-node directly** via its OpenCypher HTTP API. The anti-cheat certification requires `/readyz`, HydraDB's `graph_runtime_ready` Prometheus marker, a real graph write/read roundtrip, and HydraDB's native `algo.MSpaths` procedure. No mock or hosted memory API can generate the live certificate.
 
-### 1.2 Quick SWOT
+The narrow benchmark adds one metric to Hydra's existing routing/plan metrics: **false-success commit rate**. A naive baseline trusts `success=true`; HydraBite requires the postcondition. The acceptance gate is zero false trusted commits across adversarial semantic-failure cases.
 
-| Helpful | Harmful |
-|---------|---------|
-| **Strengths:** Unique benchmark, real ground truth, HydraDB-native, reproducible | **Weaknesses:** Requires Wiggly corpus setup, limited to scholarly domain |
-| **Opportunities:** Could become HydraDB's official benchmark, reusable across memory systems | **Threats:** HydraDB might build their own benchmark |
+The closest research, such as ToolGate, already shows why pre/postcondition-gated tool state matters. HydraBite's contribution is making that verifier-gated transition a durable, traversable HydraDB primitive at the exact point where agent execution becomes shared state and future learning signal.
 
-### 1.3 The Story
-
-**The question:** Does HydraDB's graph memory actually return correct, attributable, consistent context?
-
-**The journey:** We started building a knowledge graph. Then we realized nobody tests whether graph memory works. So we built the test.
-
-**The insight:** Fast mode achieves X% accuracy, thinking mode achieves Y%. The difference matters for production deployments.
-
-**What others can reuse:** Benchmark suite, failure taxonomy, ground truth format, HydraDB evaluation methodology.
-
----
-
-## 2. Technical
-
-### 2.1 Architecture
-
-```
-Wiggly Ground Truth → HydraDB Knowledge Sources
-    │
-    ├── hydradb_query (fast)
-    ├── hydradb_query (thinking)
-    └── hydradb_graph_query (Cypher)
-    │
-    ▼
-BenchmarkResults → FailureAnalysis → Auto-tune
-```
-
-### 2.2 HydraDB Elements Used
-
-| Tool | What |
-|------|------|
-| `hydradb_ingest` | Store Wiggly evidence as knowledge sources |
-| `hydradb_query` | Test fast vs thinking recall |
-| `hydradb_graph_query` | Test Cypher graph traversal |
-| `hydradb_list` | Verify export completeness |
-
-### 2.3 Reproducibility
-
-```bash
-pip install -e .
-memoryproof evaluate --count 50
-memoryproof report
-```
-
----
-
-## 3. Links
-
-- Code: https://github.com/prx0r/neverbrokeagain-hackathon2
-- Demo: `python demo.py`
+Once this primitive exists, better routing, self-healing workflows, certified agent reputation, human/cryptographic verifiers and cost-per-verified-success optimization become downstream graph problems. This submission deliberately builds the prerequisite, not all of them.

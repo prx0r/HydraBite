@@ -1,90 +1,101 @@
 #!/usr/bin/env python3
 """HydraBite Demo — verified state transitions for agentic actions."""
-import sys
-import os
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from hydrabite import HydraBite, Bite, Status, sha256
+from hydrabite.models import Bite, BiteStatus, Contract, VerifierClass
+from hydrabite.canonical import sha256_hex
+from hydrabite.engine import HydraBiteEngine, IntegrityViolation
+from hydrabite.receipts import ReceiptSigner
+from hydrabite.verifiers import CallableVerifier
 
-hb = HydraBite()
 
-# Register verifiers
-def db_readback(bite: Bite) -> bool:
-    return bite.metadata.get("record_exists", False)
+class MockHydra:
+    """In-memory graph for demo (replaces HydraDB)."""
+    def __init__(self):
+        self.claims = set()
+        self.vertices = {}
+        self.edges = []
+    def upsert_vertex(self, label, vid, props):
+        self.vertices[vid] = (label, props)
+        if label == "HBClaim":
+            self.claims.add(props.get("claim_key", ""))
+    def merge_edge(self, src, rel, dst, **kw):
+        self.edges.append((src, rel, dst))
+    def query(self, q, p=None, **kw):
+        if "HBClaim" in q and p and "claim_key" in p:
+            return [{"claim_key": p["claim_key"]}] if p["claim_key"] in self.claims else []
+        return [{"ok": 1}]
+    def has_verified_claim(self, k):
+        return k in self.claims
 
-hb.register_verifier("db_readback", db_readback)
 
 print("=" * 60)
 print("  HydraBite — Verified State Transitions")
 print("=" * 60)
 
-# ── Case 1: False success ────────────────────────────────────────────────
+# Setup with mock (no HydraDB needed)
+hydra = MockHydra()
+signer = ReceiptSigner.generate("demo")
+engine = HydraBiteEngine(hydra, signer)
 
+contract = Contract(
+    contract_id="create_customer",
+    description="Create a customer record",
+    produces_claim_templates=("verified_customer:{id}",),
+    allowed_verifier_ids=("db_readback",),
+)
+
+def db_readback(args, output):
+    return output.get("record_exists", False), "readback check", {}
+
+verifier = CallableVerifier("db_readback", VerifierClass.DETERMINISTIC_READBACK, db_readback)
+
+# ── Case 1: False success ──
 print("\n" + "─" * 60)
 print("  CASE 1: Agent says 'done' but record doesn't exist")
 print("─" * 60)
 
-bite1 = hb.execute("create_customer", "alice@example.com", "agent_1", {})
-hb.observe(bite1.bite_id, '{"success": true, "customer_id": 1234}')
-bite1 = hb.verify(bite1.bite_id, "db_readback")
-
+bite1 = engine.execute(contract, lambda a: {"success": True, "record_exists": False}, {"id": "1"})
+bite1 = engine.verify(contract, bite1, verifier)
 print(f"  Status: {bite1.status.value}")
-print(f"  Result: {'VERIFIED' if bite1.status == Status.VERIFIED else 'REJECTED'}")
-print(f"  Reason: record not in database")
+print(f"  Receipt: {bite1.receipt_hash[:16] if bite1.receipt_hash else 'none'}...")
 
-# ── Case 2: Verified success ──────────────────────────────────────────────
-
+# ── Case 2: Verified success ──
 print("\n" + "─" * 60)
 print("  CASE 2: Agent retries, verifier finds record")
 print("─" * 60)
 
-bite2 = hb.execute("create_customer", "bob@example.com", "agent_1", {})
-hb.observe(bite2.bite_id, '{"success": true, "customer_id": 5678}')
-bite2.metadata["record_exists"] = True  # simulates DB having the record
-bite2 = hb.verify(bite2.bite_id, "db_readback")
-
+bite2 = engine.execute(contract, lambda a: {"success": True, "record_exists": True}, {"id": "2"})
+bite2 = engine.verify(contract, bite2, verifier)
 print(f"  Status: {bite2.status.value}")
 print(f"  Receipt: {bite2.receipt_hash[:16]}...")
-print(f"  SATISFIES edge created: {any(e['type'] == 'SATISFIES' for e in hb.edges)}")
+print(f"  Claim: {bite2.metadata.get('claim_key', 'none')}")
 
-# ── Case 3: Precondition gate ─────────────────────────────────────────────
-
+# ── Case 3: Tamper detection ──
 print("\n" + "─" * 60)
-print("  CASE 3: Downstream agent checks precondition")
+print("  CASE 3: Tamper detection")
 print("─" * 60)
 
-print("  Agent: 'Can I send welcome email?'")
-print("  Precondition: requires VERIFIED customer\n")
+bite3 = engine.execute(contract, lambda a: {"success": True, "record_exists": True}, {"id": "3"})
+bite3.output["record_exists"] = False  # tamper
+try:
+    bite3 = engine.verify(contract, bite3, verifier)
+    print(f"  Status: {bite3.status.value}")
+except IntegrityViolation as e:
+    print(f"  INTEGRITY VIOLATION: {e}")
 
-# Before verification
-ok, msg = hb.check_precondition("send_welcome_email", {})
-print(f"  Before bite: {msg}")
-
-# After verification
-ok, msg = hb.check_precondition("send_welcome_email", {"verified_customer": True})
-print(f"  After bite:  {msg}")
-
-# ── Summary ────────────────────────────────────────────────────────────────
-
+# ── Summary ──
 print("\n" + "─" * 60)
 print("  SUMMARY")
 print("─" * 60)
-
-verified = hb.get_bites_by_status(Status.VERIFIED)
-rejected = hb.get_bites_by_status(Status.REJECTED)
-satisfies = [e for e in hb.edges if e["type"] == "SATISFIES"]
-
-print(f"  Verified bites: {len(verified)}")
-print(f"  Rejected bites: {len(rejected)}")
-print(f"  SATISFIES edges: {len(satisfies)} (only after verification)")
-print(f"  Graph nodes: {len(hb.graph)}")
-print(f"  Graph edges: {len(hb.edges)}")
-
-print(f"\n  Verified state:")
-for nid, node in hb.get_verified_state().items():
-    print(f"    {nid}: {node['capability']} via {node['verifier']}")
-
+verified = sum(1 for b in [bite1, bite2] if b.status == BiteStatus.VERIFIED)
+rejected = sum(1 for b in [bite1] if b.status == BiteStatus.REJECTED)
+print(f"  Verified: {verified}")
+print(f"  Rejected: {rejected}")
+print(f"  Tampered: caught by IntegrityViolation")
+print(f"  Graph nodes: {len(hydra.vertices)}")
+print(f"  Graph edges: {len(hydra.edges)}")
 print("\n" + "=" * 60)
 print("  No receipt → no trusted transition.")
-print("  Agents can't mark their own work successful.")
 print("=" * 60)

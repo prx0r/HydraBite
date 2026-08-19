@@ -1,238 +1,87 @@
-# Winning architecture: Pāṭala Research CI
+# Architecture
 
-## 1. Product boundary
+## One responsibility
 
-Pāṭala is **not** a replacement for the OpenAIRE Graph, IIS, Broker, ScholeXplorer, MONITOR, PROVIDE, OpenOrgs, or Alien MCP.
-
-OpenAIRE remains the research-intelligence substrate. Pāṭala stores the local dependency between an upstream scholarly state and a downstream conclusion.
+HydraBite owns the transition:
 
 ```text
-OpenAIRE                    Pāṭala
----------                   ------
-What exists?                What did my conclusion use?
-What is connected?          Which dependency changed?
-What changed globally?      Did that global change matter locally?
-Stable Graph release        Exact analysis state + dependency binding
-Broker enrichment           Trigger for re-verification
-AI-accessible Graph         Persistent agent memory with validity state
+UNVERIFIED execution output → VERIFIED shared state
 ```
 
-## 2. Core state machine
+It does not own semantic function selection, LLM reasoning, application auth, workflow scheduling, or the external system being mutated.
 
-```text
-TRACKED
-  │
-  ├── source unavailable ───────────────► BLOCKED
-  │
-  └── later snapshot
-         │
-         ▼
-      SEMANTIC DIFF
-         │
-     explicit dependency?
-       /          \
-     no            yes
-     │              │
- CURRENT      RECOMPUTE_REQUIRED
-                   or
-             HUMAN_REVIEW_REQUIRED
-                    │
-                    ▼
-              ProofObligation
-                    │
-              frozen plan hash
-                    │
-                    ▼
-             Resolution checks
-                    │
-              verifiable receipt
-                    │
-             ┌──────┴──────┐
-             ▼             ▼
-     VERIFIED_CURRENT   UNSUPPORTED
+## Components
+
+### `HydraClient`
+A thin direct client for HydraDB OSS `graph-node` HTTP/OpenCypher. Its live probe requires a real Hydra-specific native path call.
+
+### `Contract`
+Declares:
+- verified claims required before execution;
+- verified claims the action may produce;
+- authorized verifier IDs;
+- side-effect/reversibility metadata.
+
+The contract is content-hashed before invocation.
+
+### `HydraBiteEngine.execute`
+1. Ensure immutable-ish contract node exists by `(contract_id, contract_hash)`.
+2. Query verified prerequisite claims in HydraDB.
+3. If missing, return `BLOCKED` without calling the tool.
+4. Create `HBInvocation` in HydraDB.
+5. Execute the external function.
+6. Store the returned JSON as `HBObservation` with `SUCCEEDED_UNVERIFIED` or `EXECUTION_FAILED`.
+
+Crucially, there is no trust promotion here.
+
+### `Verifier`
+An independent gate with a stable ID and explicit verifier class. MVP verifier classes distinguish deterministic readback/tests from human, heuristic and cryptographic mechanisms.
+
+### `HydraBiteEngine.verify`
+1. Ensure verifier is authorized by the contract.
+2. Run verifier against the declared arguments and observed output.
+3. Hash the evidence.
+4. Construct and Ed25519-sign a receipt payload bound to contract/input/output/evidence hashes.
+5. Persist the receipt to HydraDB.
+6. On PASS only, create `HBClaim` nodes and their receipt lineage.
+
+## Why append rather than mutate
+
+The MVP intentionally records invocations, observations and receipts as new nodes rather than overwriting a single mutable “status” object. This preserves the evidence path and avoids making “current status” the canonical history.
+
+Multiple receipts can theoretically exist for one invocation. Product policy can later define quorum/precedence rules; the MVP uses one contract-authorized verifier per demo transition.
+
+## Trusted-state query
+
+A precondition is true only when a claim has a PASS receipt:
+
+```cypher
+MATCH (c:HBClaim {claim_key: $claim_key})
+      -[:VERIFIED_BY]->(r:HBReceipt {verdict: 'PASS'})
+RETURN c.claim_key
+LIMIT 1
 ```
 
-The system never maps an upstream change directly to `FALSE`.
+A tool's `HBObservation` is never used for this query.
 
-## 3. Data objects
+## Future Hydra-native routing
 
-### `QuerySpec`
+Once the graph accumulates verified transitions, capability edges may include empirical `cost`, `latency`, and verified-success statistics. HydraDB's native bounded path procedures can then search candidate workflows under cost constraints.
 
-Source/API selection, entity type, search, filters, paging and optional relation enrichment.
+That is intentionally downstream of the MVP. The hard prerequisite is ensuring the edge outcome is trustworthy enough to learn from.
 
-### `Snapshot`
+## HydraDB identity / mutation compatibility
 
-A query-bound scholarly state:
+The inspected HydraDB OSS revision uses integer vertex IDs as mutation identity and documents a deliberately bounded OpenCypher write subset. HydraBite therefore does not assume Neo4j's broader mutation surface.
 
-- provider/API version;
-- observed time;
-- typed source-health status;
-- normalized entities;
-- typed relations;
-- transport header (excluded from semantic digest);
-- deterministic state digest.
+String domain IDs (`inv_…`, `bite_…`, claim keys, verifier IDs) are mapped to deterministic positive 63-bit vertex IDs with SHA-256 domain separation. The readable string remains a node property.
 
-### `TrackedClaim`
+Vertex upserts use the documented transport batch form:
 
-A human-readable claim plus explicit dependencies:
-
-- `entity`: depends broadly on one OpenAIRE entity;
-- `field`: depends on a particular normalized field;
-- `relation`: depends on one typed edge;
-- `query_membership`: depends on the tracked result population.
-
-It may additionally carry a deterministic computation (`count`, `ratio`, `ratio_relation`).
-
-### `SemanticDiff`
-
-Change classes:
-
-- `ENTITY_ADDED`
-- `ENTITY_REMOVED`
-- `FIELD_CHANGED`
-- `RAW_RECORD_CHANGED` (non-modeled upstream change)
-- `RELATION_ADDED`
-- `RELATION_REMOVED`
-- `SOURCE_UNAVAILABLE`
-- `SOURCE_PARTIAL`
-
-Materiality classes:
-
-- `COSMETIC`
-- `IDENTITY`
-- `METADATA`
-- `RELATION`
-- `AVAILABILITY`
-- `CORRECTION`
-- `RETRACTION`
-- `QUERY_MEMBERSHIP`
-- `SOURCE_HEALTH`
-
-### `ImpactReport`
-
-The result of intersecting the diff with explicit dependencies. Unrelated claims stay `CURRENT`.
-
-### `ProofObligation`
-
-A machine-readable task with:
-
-- exact triggering change IDs;
-- claim ID;
-- reason;
-- resolution class (`RECOMPUTE`, `HUMAN_REVIEW`, `RETRY_SOURCE`).
-
-### `ResolutionPlan`
-
-A frozen, content-hashed plan inspired by QDW verification plans and software-attestation layouts. It binds the obligation to:
-
-- analysis ID;
-- claim ID;
-- old snapshot digest;
-- new snapshot digest;
-- dependency digest;
-- computation digest;
-- required checks.
-
-### `VerificationReceipt`
-
-Records exactly what checks ran, against which subject binding, with artifact hashes and an environment record. A changed plan no longer verifies the old receipt.
-
-## 4. Why normalized semantic records instead of raw JSON diff
-
-OpenAIRE APIs evolve, V4 is beta, and API responses contain transport/paging values that should not create scholarly change events. A raw JSON diff would cause alert fatigue.
-
-Pāṭala therefore stores two notions:
-
-1. **normalized semantic fields** used for direct impact;
-2. **raw canonical digest** used as a fallback signal that the upstream record changed outside the current normalized projection.
-
-This preserves forward compatibility without pretending every new field is immediately understood.
-
-## 5. Source health as a first-class object
-
-The most important negative invariant:
-
-```text
-SOURCE FAILURE != ZERO RESULTS
+```cypher
+UNWIND $rows AS row
+MERGE (n {id: row.vertex})
+SET n:HBClaim, n.claim_key = row.claim_key
 ```
 
-If OpenAIRE times out, Pāṭala emits `SOURCE_UNAVAILABLE` and blocks verification. It does **not** generate N entity removals. If the primary Graph succeeds but ScholeXplorer enrichment is partial, Pāṭala emits `SOURCE_PARTIAL`, suppresses relation deletions, blocks relation-dependent claims, and can still evaluate claims that only depend on the healthy primary Graph plane. Failed/partial observations never replace the last known-good baseline. This pattern was adapted from QDW's anti-cheat/source-health doctrine and is essential for a change-monitoring service.
-
-## 6. Impact semantics
-
-Impact propagation is deliberately conservative.
-
-- Query membership change affects claims that explicitly declare `query_membership`.
-- A field change affects field dependencies on that entity/path.
-- A removed relation affects matching relation dependencies.
-- Retraction/correction on a depended-on entity escalates to human review.
-- No matching dependency means `CURRENT`.
-
-Future versions can add richer typed dependency edges (`GROUNDS`, `USES_AS_PREMISE`, `USES_AS_WARRANT`) from Pāṭala's scholarly review engine without changing the core protocol.
-
-## 7. Resolution semantics
-
-For a computable claim, a proof obligation can be resolved automatically by recomputing against the current snapshot.
-
-For a non-computable claim, the resolution plan requires an evidence artifact and can later be connected to Pāṭala's HumanAttestation / adjudication model.
-
-The key rule is:
-
-> **No obligation is closed solely because an agent says it is fixed.**
-
-## 8. Event history
-
-Every lifecycle transition is appended to a hash-chained JSONL ledger:
-
-```text
-analysis.tracked
-analysis.verified
-obligation.resolved
-...
-```
-
-Each event binds the previous hash. `verify-ledger` detects mutation of historical entries.
-
-This lightweight portable ledger is the hackathon implementation. Pāṭala/Wiggly's larger architecture can use stronger event stores and Merkle checkpoints without changing the public objects.
-
-## 9. Agent-native design
-
-An optional MCP server exposes:
-
-- `list_tracked_analyses`
-- `verify_analysis`
-- `list_proof_obligations`
-- `verify_ledger`
-
-A persistent agent can therefore treat claim validity as state rather than silently caching an answer forever.
-
-## 10. Scaling path
-
-Hackathon MVP:
-
-```text
-local JSON state + bounded API queries
-```
-
-Pilot:
-
-```text
-Broker / scheduled Graph update
-→ queue affected TrackedAnalyses
-→ incremental entity/relation refresh
-→ impact graph
-→ obligations
-```
-
-Large institutional deployment:
-
-```text
-bulk/BigQuery Graph snapshots
-→ columnar normalized state
-→ entity/relation change index
-→ dependency reverse index
-→ event bus
-→ institution/agent-specific obligations
-```
-
-The public protocol stays the same at each scale.
+Edges use the documented matched relationship upsert form with a deterministic relationship ID. Every mutation is followed by a **strong readback** before the engine advances. This is intentional: an empty mutation response is not treated as proof that the graph changed.

@@ -1,14 +1,13 @@
-import unittest
-from patala_research_ci.canonical import digest_json
+import math
+import pytest
+from hydrabite.canonical import canonical_bytes, sha256_hex
 
-class CanonicalTests(unittest.TestCase):
-    def test_dict_order_stable(self):
-        self.assertEqual(digest_json({'b':2,'a':1}), digest_json({'a':1,'b':2}))
 
-    def test_list_order_preserved(self):
-        self.assertNotEqual(digest_json({'a':[1,2]}), digest_json({'a':[2,1]}))
+def test_canonical_hash_is_order_independent():
+    assert canonical_bytes({"b": 2, "a": 1}) == canonical_bytes({"a": 1, "b": 2})
+    assert sha256_hex({"b": 2, "a": 1}) == sha256_hex({"a": 1, "b": 2})
 
-    def test_transport_fields_can_be_dropped(self):
-        a={'header':{'queryTime':12,'numFound':3},'x':1}
-        b={'header':{'queryTime':99,'numFound':3},'x':1}
-        self.assertEqual(digest_json(a,drop_volatile=True),digest_json(b,drop_volatile=True))
+
+def test_nonfinite_values_rejected():
+    with pytest.raises(ValueError):
+        canonical_bytes({"x": math.nan})
