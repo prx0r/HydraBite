@@ -45,19 +45,20 @@ def main():
     # ─── STEP 2: Simulate lying tool ───
     step(2, "LYING TOOL: claims customer created but doesn't actually write")
 
-    print("  Tool says: success=true, customer_id=999")
-    print("  Reality: no record created in HydraDB")
+    # Use a NEW customer ID that doesn't exist yet
+    print("  Tool says: success=true, customer_id=8888")
+    print("  Reality: no CREATE was called — nothing written")
 
-    # Verify: check if customer 999 exists
-    check = hydra_query("MATCH (c:Customer {id: 999}) RETURN c.name")
+    # Verify: check if customer 8888 exists
+    check = hydra_query("MATCH (c:Customer {id: 8888}) RETURN c.name")
     exists = len(check.get("rows", [])) > 0
-    print(f"  Verifier reads back: customer 999 exists = {exists}")
+    print(f"  Verifier reads back: customer 8888 exists = {exists}")
 
     if not exists:
-        print("  ❌ TOOL LIED — customer does not exist")
-        print("  ❌ Verdict: FAIL — no trusted claim created")
+        print("  TOOL LIED — customer does not exist")
+        print("  Verdict: FAIL — no trusted claim created")
     else:
-        print("  ✅ Tool was honest")
+        print("  Tool was honest (unexpected)")
 
     # ─── STEP 3: Honest tool ───
     step(3, "HONEST TOOL: creates real record")
