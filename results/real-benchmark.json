@@ -1,0 +1,158 @@
+{
+  "schema": "real-benchmark.v1",
+  "total_trials": 8,
+  "infrastructure": {
+    "hydra_alive": true,
+    "hermes_alive": true,
+    "mcp_alive": true
+  },
+  "results": {
+    "tool_success_rate": 0.375,
+    "verification_rate": 0.25,
+    "false_trusted_successes": 1,
+    "hermes_routing_rate": 0.625,
+    "avg_tool_latency_ms": 245.34234404563904,
+    "avg_verification_latency_ms": 0.006467103958129883
+  },
+  "trials": [
+    {
+      "task_id": "patala.get_work",
+      "task_description": "Get metadata for the Vij\u00f1\u0101nabhairava tantra",
+      "tool_name": "get_work",
+      "tool_success": false,
+      "tool_latency_ms": 354.306697845459,
+      "verified": false,
+      "verification_evidence": {
+        "mcp_error": true,
+        "error_text": "fetch failed"
+      },
+      "verification_latency_ms": 0.0026226043701171875,
+      "hermes_routed": false,
+      "hermes_confidence": 0.0,
+      "stored_in_hydra": true,
+      "total_latency_ms": 15412.884712219238
+    },
+    {
+      "task_id": "patala.search_passages",
+      "task_description": "Search for '\u015bakti' in the Sanskrit corpus",
+      "tool_name": "search_passages",
+      "tool_success": false,
+      "tool_latency_ms": 366.93334579467773,
+      "verified": false,
+      "verification_evidence": {
+        "mcp_error": true,
+        "error_text": "fetch failed"
+      },
+      "verification_latency_ms": 0.00286102294921875,
+      "hermes_routed": true,
+      "hermes_confidence": 0.9,
+      "stored_in_hydra": true,
+      "total_latency_ms": 11905.243635177612
+    },
+    {
+      "task_id": "patala.verify_quote",
+      "task_description": "Verify a known quote exists in source",
+      "tool_name": "verify_quote",
+      "tool_success": false,
+      "tool_latency_ms": 329.82587814331055,
+      "verified": false,
+      "verification_evidence": {
+        "mcp_error": true,
+        "error_text": "fetch failed"
+      },
+      "verification_latency_ms": 0.0019073486328125,
+      "hermes_routed": true,
+      "hermes_confidence": 0.9,
+      "stored_in_hydra": true,
+      "total_latency_ms": 11400.32172203064
+    },
+    {
+      "task_id": "patala.get_source_passage",
+      "task_description": "Get Sanskrit text of a specific passage",
+      "tool_name": "get_source_passage",
+      "tool_success": false,
+      "tool_latency_ms": 338.0615711212158,
+      "verified": false,
+      "verification_evidence": {
+        "mcp_error": true,
+        "error_text": "fetch failed"
+      },
+      "verification_latency_ms": 0.002384185791015625,
+      "hermes_routed": false,
+      "hermes_confidence": 0.0,
+      "stored_in_hydra": true,
+      "total_latency_ms": 15375.224113464355
+    },
+    {
+      "task_id": "patala.get_themes",
+      "task_description": "Get theme structure for IPVV",
+      "tool_name": "get_themes",
+      "tool_success": false,
+      "tool_latency_ms": 304.58784103393555,
+      "verified": false,
+      "verification_evidence": {
+        "mcp_error": true,
+        "error_text": "fetch failed"
+      },
+      "verification_latency_ms": 0.002384185791015625,
+      "hermes_routed": true,
+      "hermes_confidence": 0.9,
+      "stored_in_hydra": true,
+      "total_latency_ms": 14294.17109489441
+    },
+    {
+      "task_id": "patala.get_term_senses",
+      "task_description": "Get accepted senses for a Sanskrit term",
+      "tool_name": "get_term_senses",
+      "tool_success": true,
+      "tool_latency_ms": 244.79150772094727,
+      "verified": false,
+      "verification_evidence": {
+        "expected_fields": [
+          "senses"
+        ],
+        "actual_keys": [
+          "content"
+        ]
+      },
+      "verification_latency_ms": 0.010967254638671875,
+      "hermes_routed": true,
+      "hermes_confidence": 0.9,
+      "stored_in_hydra": true,
+      "total_latency_ms": 9960.23941040039
+    },
+    {
+      "task_id": "file.write_and_read",
+      "task_description": "Write a file and read it back to verify integrity",
+      "tool_name": "filesystem",
+      "tool_success": true,
+      "tool_latency_ms": 0.15306472778320312,
+      "verified": true,
+      "verification_evidence": {
+        "path": "/tmp/bench-marker.txt",
+        "exists": true
+      },
+      "verification_latency_ms": 0.026464462280273438,
+      "hermes_routed": true,
+      "hermes_confidence": 0.9,
+      "stored_in_hydra": true,
+      "total_latency_ms": 12015.18177986145
+    },
+    {
+      "task_id": "hydra.write_and_query",
+      "task_description": "Write a node to HydraDB and query it back",
+      "tool_name": "hydra",
+      "tool_success": true,
+      "tool_latency_ms": 24.078845977783203,
+      "verified": true,
+      "verification_evidence": {
+        "roundtrip": true
+      },
+      "verification_latency_ms": 0.0021457672119140625,
+      "hermes_routed": false,
+      "hermes_confidence": 0.0,
+      "stored_in_hydra": true,
+      "total_latency_ms": 15064.131498336792
+    }
+  ]
+}
