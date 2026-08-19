@@ -1,6 +1,6 @@
 """CLI for Iolaus."""
 import sys
-from . import Iolaus, Bite, Status
+from . import IolausEngine, Bite, BiteStatus
 
 
 def main():

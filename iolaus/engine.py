@@ -130,7 +130,6 @@ class IolausEngine:
         if passed:
             bite.status = BiteStatus.VERIFIED
             # Create verified claim in graph
-            # Use the original tool args to build claim key
             args = bite.metadata.get("args", {})
             claim_id = args.get("id", bite.bite_id.split("_")[-1])
             claim_key = contract.produces_claim_templates[0].replace(
@@ -138,14 +137,31 @@ class IolausEngine:
             ) if contract.produces_claim_templates else f"claim:{bite.bite_id}"
             bite.metadata["claim_key"] = claim_key
 
-            # Store in HydraDB (creates SATISFIES edge)
-            vid = stable_vertex_id("claim", claim_key)
-            self.hydra.upsert_vertex("HBClaim", vid, {
+            # Store HBClaim vertex
+            claim_vid = stable_vertex_id("claim", claim_key)
+            self.hydra.upsert_vertex("HBClaim", claim_vid, {
                 "claim_key": claim_key,
                 "bite_id": bite.bite_id,
                 "receipt_hash": bite.receipt_hash,
                 "verifier": verifier.verifier_id,
             })
+
+            # Store HBReceipt vertex (the receipt that proves this claim)
+            receipt_vid = stable_vertex_id("receipt", bite.receipt_hash)
+            self.hydra.upsert_vertex("HBReceipt", receipt_vid, {
+                "receipt_id": bite.receipt_hash,
+                "verdict": "PASS",
+                "contract_id": contract.contract_id,
+                "verifier_id": verifier.verifier_id,
+                "evidence_hash": receipt.evidence_hash,
+            })
+
+            # Create VERIFIED_BY edge: HBClaim → VERIFIED_BY → HBReceipt
+            self.hydra.merge_edge(claim_vid, "VERIFIED_BY", receipt_vid)
+
+            # Create VERIFIES edge: HBReceipt → VERIFIES → invocation
+            invocation_vid = stable_vertex_id("invocation", bite.bite_id)
+            self.hydra.merge_edge(receipt_vid, "VERIFIES", invocation_vid)
         else:
             bite.status = BiteStatus.REJECTED
             bite.metadata["claim_key"] = None
