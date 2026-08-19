@@ -1,0 +1,1108 @@
+Yes. I think this framing is substantially more useful than asking “what MCP/API can I build?”
+
+The question becomes:
+
+> **Assume autonomous agents become dramatically more capable over the next 12 months. What new constraints appear as they move from generating information → taking actions → spending money → coordinating workers → interacting with physical reality?**
+
+That points toward infrastructure whose value **increases when models get better**, rather than products that models eventually absorb.
+
+And yes: **agents hiring humans is already real.** RentAHuman currently advertises 750k+ humans across 100+ countries and exposes REST/MCP interfaces so an agent can search workers, post tasks and manage hiring. MeatLayer similarly exposes API/MCP hiring, escrow, proof submission and webhooks. ([RentAHuman][1])
+
+More importantly, this isn't purely a meme anymore: researchers have already studied hundreds of RentAHuman bounties and found meaningful programmatic agent usage—along with exactly the kinds of safety/verification problems you'd expect from giving software physical-world reach. ([arXiv][2])
+
+## Where I think agents are actually heading
+
+We're approximately here:
+
+```text
+2024
+AI → answers
+
+2025
+AI → tool calls
+
+2026
+AI → long-running work
+   → browser/computer control
+   → other agents
+   → payments
+   → APIs/MCP
+   → humans
+
+2027-ish
+AI → budgets
+   → persistent authority
+   → procurement
+   → contracting
+   → business operations
+   → physical-world delegation
+   → fleets of specialist agents/humans/robots
+```
+
+This trajectory is visible in the standards being assembled around agents. Google's current protocol breakdown is almost a diagram of the emerging economy:
+
+```text
+MCP → agent ↔ tools
+A2A → agent ↔ agent
+UCP → agent ↔ commerce
+AP2 → agent ↔ payment authorization
+```
+
+([Google Developers Blog][3])
+
+And x402 is already production infrastructure for an agent to encounter a priced HTTP resource and pay programmatically without an account/session/API-key dance. ([x402][4])
+
+So I think **intelligence is becoming less of the scarce resource**.
+
+The scarce things increasingly become:
+
+```text
+AUTHORITY
+What may the agent do?
+
+MONEY
+What can it spend?
+
+IDENTITY
+Who is acting?
+
+TRUST
+Who should it interact with?
+
+REALITY
+What is actually happening?
+
+EXECUTION
+Who/what can physically accomplish something?
+
+VERIFICATION
+Did it really happen?
+
+LIABILITY
+Who is responsible?
+
+ATTENTION
+When must a human intervene?
+```
+
+Those are potentially much stronger businesses.
+
+---
+
+# The key idea: Reality becomes expensive
+
+Consider an extremely capable 2027 agent.
+
+You tell it:
+
+> “Figure out whether these 200 convenience stores actually stock my product.”
+
+The model can reason perfectly.
+
+It can search perfectly.
+
+It can write beautiful code.
+
+It still cannot **look at shelf #4 in a shop in Phnom Penh today**.
+
+It needs:
+
+```text
+human
+camera
+robot
+sensor
+merchant API
+satellite
+delivery service
+phone call
+official record
+```
+
+That interface between computation and reality is scarce.
+
+I would call the broad category:
+
+# **Reality infrastructure for agents**
+
+That contains some very interesting API businesses.
+
+---
+
+# 1. Human-as-a-tool API
+
+RentAHuman/MeatLayer prove the category exists. ([RentAHuman][1])
+
+But you don't necessarily want to compete by recruiting 750,000 people.
+
+Instead build a **routing layer across human networks**.
+
+An agent asks:
+
+```http
+POST /execute
+```
+
+```json
+{
+  "task": "photograph storefront",
+  "location": "Kampot, Cambodia",
+  "deadline": "4 hours",
+  "budget": 8,
+  "proof_required": ["gps", "photo"]
+}
+```
+
+Your infrastructure finds the appropriate execution network.
+
+Today:
+
+```text
+RentAHuman
+MeatLayer
+traditional gig platform
+specialist contractor
+local courier
+research service
+```
+
+Later:
+
+```text
+human
+robot
+drone
+autonomous vehicle
+local agent
+```
+
+The abstraction is not:
+
+> hire a human.
+
+It's:
+
+> **cause X to happen in reality.**
+
+That is much bigger.
+
+---
+
+# 2. `RealityRouter`
+
+This one I really like.
+
+```http
+POST /resolve
+```
+
+Goal:
+
+```text
+"Check whether building X still exists."
+```
+
+Your system determines:
+
+```text
+Method A: local human       $3.40 / 40 min / confidence .99
+Method B: Street View       $0.01 / 2 sec / freshness 8 months
+Method C: merchant call     $0.40 / 4 min / confidence .87
+Method D: satellite image   $1.20 / 30 sec / confidence .72
+```
+
+Then chooses according to constraints.
+
+That's analogous to an LLM router except for **reality acquisition**.
+
+Potentially very powerful.
+
+---
+
+# 3. Proof-of-physical-work
+
+Once agents start hiring strangers, this becomes fundamental.
+
+Agent:
+
+> Put this promotional sign in this location.
+
+Human says:
+
+> Done.
+
+Now what?
+
+You need proof.
+
+Not merely one JPEG.
+
+Something like:
+
+```json
+{
+  "task_id": "...",
+  "worker": "...",
+  "timestamp": "...",
+  "location_attestation": "...",
+  "media_hashes": [],
+  "device_attestation": "...",
+  "challenge_response": "...",
+  "verification_score": 0.98
+}
+```
+
+MeatLayer already recognizes this requirement enough to expose **proof review** as part of its workflow. ([MeatLayer][5])
+
+But a neutral proof infrastructure could serve **every marketplace**.
+
+This is much more defensible than another marketplace.
+
+---
+
+# 4. Reality attestation
+
+Generalize it.
+
+```http
+POST /attest
+```
+
+Verify claims like:
+
+```text
+this shop is open
+this machine is damaged
+this parcel arrived
+this billboard is installed
+this item is in stock
+this queue is 20 people long
+this apartment exists
+this event occurred
+this meter reads X
+```
+
+Think:
+
+> **TLS certificates for real-world facts.**
+
+Not infallible truth.
+
+Rather:
+
+```text
+observed by whom?
+when?
+where?
+through what device?
+what evidence?
+has evidence been altered?
+independent corroboration?
+confidence?
+```
+
+I think this category becomes huge if agents become economic actors.
+
+---
+
+# 5. Human oracle network
+
+A more general version:
+
+```http
+POST /ask-human
+```
+
+Not for physical work necessarily.
+
+For things AI is uncertain about:
+
+```text
+Does this UI look broken?
+Does this translation sound native?
+Is this store actually operating?
+Which entrance should the courier use?
+Does this object match the description?
+Is this phone conversation suspicious?
+```
+
+And your API handles:
+
+```text
+routing
+worker selection
+micro-payment
+response aggregation
+confidence
+reputation
+proof
+```
+
+It's almost:
+
+> **an inference API whose models happen to be humans.**
+
+That is a fascinating inversion.
+
+---
+
+# 6. Escalation API
+
+I think this could be even more immediately useful.
+
+Agents increasingly operate autonomously, but sometimes hit:
+
+```text
+uncertainty
+CAPTCHA
+ambiguous UI
+unexpected negotiation
+legal acknowledgement
+physical action
+identity requirement
+unrecognized situation
+high-risk decision
+```
+
+Instead of failing:
+
+```http
+POST /escalate
+```
+
+Your system finds an appropriate human.
+
+Input:
+
+```json
+{
+  "task": "...",
+  "reason": "ambiguity",
+  "required_skill": "accounting",
+  "max_latency_seconds": 120,
+  "budget": 1.00
+}
+```
+
+Return human judgment.
+
+That's potentially easier to sell than “AI hires humans.”
+
+It's:
+
+> **fault tolerance for autonomous agents.**
+
+---
+
+# 7. Human latency market
+
+Once humans become callable resources, agents need to know:
+
+```text
+price
+latency
+location
+skills
+reliability
+availability
+identity confidence
+historical accuracy
+```
+
+So build the intelligence layer:
+
+```http
+POST /quote
+```
+
+```json
+{
+  "skill": "native Japanese",
+  "response_under": "5m"
+}
+```
+
+Output:
+
+```text
+expected price      $0.42
+expected response   84 sec
+available workers   41
+confidence           .96
+```
+
+Essentially:
+
+> AWS spot pricing for human cognition.
+
+Not necessarily a marketplace itself.
+
+---
+
+# 8. Human capability ontology
+
+Agents need to translate fuzzy requests:
+
+> “I need someone to go to an electronics shop and confirm three laptop models.”
+
+into requirements:
+
+```text
+physical_presence
+Cambodia/Kampot
+smartphone_camera
+basic_English
+electronics_identification
+~20 minutes
+transport_required
+```
+
+Then match them against workers.
+
+A neutral:
+
+```http
+POST /task-requirements
+```
+
+could feed marketplaces.
+
+---
+
+# 9. Human/agent/robot substitution engine
+
+This could become very interesting over time.
+
+Input task:
+
+```text
+inspect solar panel
+```
+
+Return:
+
+```text
+human worker     possible
+drone            possible
+satellite        insufficient resolution
+fixed camera     possible if installed
+web agent        impossible
+robot            possible at certain sites
+```
+
+And economics.
+
+This becomes:
+
+> **who should do the work?**
+
+Eventually the marketplace isn't humans versus agents.
+
+It's a market of:
+
+```text
+models
+agents
+software
+humans
+robots
+vehicles
+sensors
+```
+
+all bidding to fulfill goals.
+
+There is already academic work explicitly framing the emerging economy as economic action distributed across humans, software agents, robots and infrastructure. ([arXiv][6])
+
+---
+
+# 10. Outcome marketplace rather than labor marketplace
+
+This distinction matters.
+
+Don't sell:
+
+> one hour of Tom.
+
+Sell:
+
+> “Verify that shop X sells product Y before 5 p.m.”
+
+Agent doesn't care who does it.
+
+Therefore the underlying primitive is:
+
+```text
+REQUEST
+    ↓
+desired outcome
+constraints
+budget
+deadline
+proof specification
+    ↓
+MARKET
+    ↓
+human / agent / robot / service
+    ↓
+RESULT
+    ↓
+verification
+    ↓
+payment
+```
+
+That's much closer to the market I think eventually exists.
+
+And it resembles the earlier **Moltwork** idea we explored: jobs become executable objects with claiming, execution, verification and receipts rather than merely freelancer listings.
+
+---
+
+# 11. Work receipts
+
+This could become its own protocol/API.
+
+Every task produces:
+
+```json
+{
+  "task": "...",
+  "principal": "...",
+  "executor": "...",
+  "requested_at": "...",
+  "completed_at": "...",
+  "price": "...",
+  "evidence": [],
+  "verifier": "...",
+  "result_hash": "...",
+  "accepted": true
+}
+```
+
+Then workers/agents accumulate **provable histories**.
+
+This addresses a problem in both agent reputation and human reputation:
+
+> Don't tell me you're good. Show me the signed history of things you actually accomplished.
+
+There is current research converging on this exact direction: EpochX models humans and agents as peer participants where tasks are claimed, delivered, verified and settled, and completed work leaves reusable artifacts and execution traces. ([arXiv][7])
+
+That is very close to your thinking.
+
+---
+
+# 12. `CanAgentDoThis?`
+
+As permissions increase, another primitive becomes crucial.
+
+```http
+POST /can-execute
+```
+
+Input:
+
+```text
+agent identity
+user identity
+requested action
+target
+jurisdiction
+credentials
+budget
+```
+
+Output:
+
+```text
+allowed
+not allowed
+requires human confirmation
+requires stronger authentication
+requires another credential
+maximum spend
+reason
+```
+
+Current MCP specifications explicitly emphasize user consent/control because MCP can expose arbitrary data access and code execution. Its July 2026 release also continued tightening authorization because implementers are struggling with this layer in practice. ([Model Context Protocol][8])
+
+Permissions get *more important*, not less, as agents improve.
+
+---
+
+# 13. Delegation chains
+
+This is going to get weird quickly.
+
+```text
+Tom
+ ↓ delegates $100
+personal agent
+ ↓ delegates $15
+research agent
+ ↓ delegates $3
+local-agent broker
+ ↓ hires
+human
+```
+
+Who was actually authorized to spend $3?
+
+Was the human allowed to enter a building?
+
+Can the research agent subcontract?
+
+What happens when agent B delegates to C?
+
+You need:
+
+```text
+principal
+delegate
+scope
+budget
+expiry
+subdelegation rights
+revocation
+receipts
+```
+
+Possible product:
+
+```http
+POST /delegations
+POST /authorize
+POST /revoke
+GET /chain
+```
+
+I think **delegated authority infrastructure** is one of the strongest themes of the next year.
+
+---
+
+# 14. Agent budgets
+
+Payments themselves are becoming solved.
+
+Payment **policy** isn't.
+
+x402 gives machines a way to pay HTTP services. AP2 provides authorization infrastructure around agent payments. ([x402][9])
+
+The next problem:
+
+```text
+May this agent spend?
+How much?
+On what?
+How frequently?
+With whom?
+What if price changes?
+What requires approval?
+What counts toward a project budget?
+```
+
+Build:
+
+```http
+POST /spend-authorize
+```
+
+Think:
+
+> corporate card controls for autonomous agents.
+
+This could be very valuable.
+
+---
+
+# 15. Agent procurement
+
+Once agents have budgets:
+
+> Find the best OCR provider and buy 50,000 pages.
+
+Or:
+
+> Hire someone locally to photograph these locations.
+
+Now you need machine procurement:
+
+```text
+discover supplier
+request quotes
+compare
+check reputation
+check compliance
+negotiate
+authorize
+buy
+verify delivery
+settle
+```
+
+That is a gigantic infrastructure category.
+
+Today's “agent marketplace” probably evolves toward **procurement protocols**.
+
+---
+
+# 16. Reality reputation
+
+This differs from generic freelancer ratings.
+
+For a worker:
+
+```text
+GPS tasks:            1,408
+verified completion:  98.9%
+photo authenticity:   99.4%
+median response:      13m
+disputed tasks:       0.7%
+Cambodia presence:    verified
+retail checks:        812
+```
+
+Now an agent can quantitatively decide whether to trust them.
+
+Likewise:
+
+```text
+robot
+agent
+API
+human
+merchant
+sensor
+```
+
+All can have task-specific reputation.
+
+---
+
+# 17. Proof requirements generator
+
+Another tiny API:
+
+Input:
+
+```text
+"Check whether restaurant is open."
+```
+
+Output:
+
+```json
+{
+  "required": [
+    "current timestamp",
+    "geolocation",
+    "storefront photograph"
+  ],
+  "optional": [
+    "opening-hours photograph"
+  ],
+  "anti_fraud": [
+    "random visual challenge"
+  ]
+}
+```
+
+The agent shouldn't invent verification procedures itself every time.
+
+You build a library of **proof schemas for real-world tasks**.
+
+I really like this as a niche API.
+
+---
+
+# 18. Real-world task risk API
+
+The darker side of agent→human delegation appears immediately: one 2026 empirical study identified impersonation, credential abuse, reconnaissance and other misuse among marketplace bounties. ([arXiv][2])
+
+That implies an obvious infrastructure product:
+
+```http
+POST /screen-task
+```
+
+Output:
+
+```text
+safe to dispatch
+requires manual review
+prohibited
+suspicious identity request
+privacy concern
+possible trespass
+financial risk
+```
+
+Marketplace-independent trust/safety infrastructure.
+
+Potential customers:
+
+```text
+RentAHuman-like markets
+delivery networks
+robot operators
+agent platforms
+gig platforms
+enterprise agent systems
+```
+
+---
+
+# 19. Reality firewall
+
+Combine permissions + human delegation + payments.
+
+Before an agent creates an external-world consequence:
+
+```text
+send money
+hire human
+book service
+sign agreement
+dispatch robot
+send public communication
+purchase item
+change infrastructure
+```
+
+call:
+
+```http
+POST /authorize-action
+```
+
+It evaluates:
+
+```text
+identity
+delegation
+risk
+reversibility
+cost
+history
+target
+policy
+confidence
+```
+
+Then:
+
+```text
+ALLOW
+ALLOW_WITH_LIMIT
+ASK_HUMAN
+DENY
+```
+
+This feels like a potentially **major category**.
+
+---
+
+# 20. What changes when agents get much better?
+
+This is the key strategic question.
+
+Suppose model intelligence improves 10×.
+
+These products get **less** valuable:
+
+```text
+prompt optimizers
+simple wrappers
+basic research agents
+basic summarizers
+generic RAG
+basic coding copilots
+simple workflow builders
+```
+
+Because intelligence eats them.
+
+But these get **more** valuable:
+
+```text
+identity
+payments
+authorization
+reputation
+real-world execution
+proof
+fresh data
+exclusive data
+physical access
+legal authority
+human attention
+sensors
+robots
+distribution
+transaction history
+```
+
+That is where I would hunt.
+
+---
+
+# The next-year stack I expect
+
+My inference from current standards, products and research is roughly:
+
+```text
+                    HUMAN INTENT
+                         │
+                         ▼
+                 PERSONAL/ORG AGENT
+                         │
+               ┌─────────┴─────────┐
+               ▼                   ▼
+          AUTHORITY             BUDGET
+               │                   │
+               └─────────┬─────────┘
+                         ▼
+                    PLANNING
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+        TOOL           AGENT          MARKET
+        MCP             A2A          UCP/x402
+          │              │              │
+          └──────────────┼──────────────┘
+                         ▼
+                    EXECUTION
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+       SOFTWARE         HUMAN          ROBOT
+          │              │              │
+          └──────────────┼──────────────┘
+                         ▼
+                      REALITY
+                         │
+                         ▼
+                      PROOF
+                         │
+                         ▼
+                    REPUTATION
+```
+
+The interoperability/payment layers are already being standardized. ([Google Developers Blog][3])
+
+**The bottom half is much less solved.**
+
+That's the opportunity.
+
+---
+
+# This changes how I'd think about your niche
+
+Your original framing:
+
+> machine-readable intelligence helping agents make safer, cheaper, better decisions
+
+is still good.
+
+But I would expand it to:
+
+> **Infrastructure that lets autonomous agents safely acquire resources and cause verified changes in the real world.**
+
+Then you have three very durable pillars:
+
+### **KNOW**
+
+Machine-readable reality.
+
+```text
+prices
+availability
+rules
+capabilities
+reputation
+current state
+```
+
+### **ACT**
+
+Machine-executable reality.
+
+```text
+APIs
+agents
+humans
+robots
+commerce
+services
+```
+
+### **PROVE**
+
+Machine-verifiable reality.
+
+```text
+receipts
+attestations
+evidence
+identity
+provenance
+completion
+```
+
+And the best businesses sit between them.
+
+---
+
+# Where I see the real gold
+
+I'd investigate these five as actual ventures:
+
+**1. RealityRouter**
+One API through which an agent can request an outcome, and the system routes it to software, another agent, a human or eventually a robot.
+
+**2. Proof-of-Work / Reality Attestation API**
+Neutral verification infrastructure for agent-commissioned physical tasks.
+
+**3. Human Escalation API**
+Any autonomous agent can cheaply summon appropriate human cognition/physical intervention when stuck.
+
+**4. Delegated Authority + Budget API**
+Machine-readable answer to “is this agent actually authorized to perform/spend/delegate this?”
+
+**5. Work Receipt / Reputation Protocol**
+Portable proof that a human/agent/robot performed X, under Y conditions, with Z result.
+
+And **Moltwork becomes considerably more interesting in this framing**. Rather than another “marketplace of AI agents,” it could become a **universal work protocol**:
+
+```text
+submit outcome
+     ↓
+bid / route
+     ↓
+human | agent | model | service | robot
+     ↓
+execute
+     ↓
+prove
+     ↓
+verify
+     ↓
+receipt
+     ↓
+settle
+```
+
+That also connects neatly to the earlier version we discussed where model workers claim tasks and produce verifiable execution receipts. The expansion is simply that **workers aren't necessarily models anymore**.
+
+The deepest moat wouldn't be the marketplace UI. It would be the accumulated graph of **what work exists, who/what can perform it, what it actually costs, how reliably they perform it, and what constitutes convincing proof**.
+
+That dataset becomes more valuable every single time autonomous agents become more capable.
+
+[1]: https://rentahuman.ai/?utm_source=chatgpt.com "RentAHuman: Hire humans for any task."
+[2]: https://arxiv.org/html/2602.19514v1?utm_source=chatgpt.com "Security Risks of AI Agents Hiring Humans"
+[3]: https://developers.googleblog.com/developers-guide-to-ai-agent-protocols/?utm_source=chatgpt.com "Developer's Guide to AI Agent Protocols"
+[4]: https://x402.org/?utm_source=chatgpt.com "x402"
+[5]: https://meatlayer.ai/?utm_source=chatgpt.com "MeatLayer | The AI-to-Human Hiring Marketplace"
+[6]: https://arxiv.org/abs/2605.18935?utm_source=chatgpt.com "The Agentic Economy: Humans, AI Agents, Robots, and the Measurable Transition toward Distributed Economic Action"
+[7]: https://arxiv.org/abs/2603.27304?utm_source=chatgpt.com "EpochX: Building the Infrastructure for an Emergent Agent Civilization"
+[8]: https://modelcontextprotocol.io/specification/2026-07-28?utm_source=chatgpt.com "Specification"
+[9]: https://docs.x402.org/introduction?utm_source=chatgpt.com "Welcome to x402 - x402"

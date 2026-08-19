@@ -1,0 +1,854 @@
+Yes. I searched specifically for this, and the result is stronger than I expected:
+
+**almost every component of the Pāṭala vision exists somewhere, but I found no mature system that joins them into the full loop.** The missing product is essentially:
+
+> **verified expert identity → claim-level scholarly judgments → source provenance → machine-readable trust → downstream-use accounting → economic rewards to the humans providing verification.**
+
+That gap looks particularly important in 2026 because several projects have independently started converging on exactly the underlying problem. ([arXiv][1])
+
+## The closest things that already exist
+
+### 1. ORCID solved **“who is this scholar?”**
+
+ORCID gives researchers persistent identities. Crossref, DataCite and ORCID already operate as interconnected infrastructure for identifying researchers, works and other research objects. ([ORCID][2])
+
+But ORCID basically tells you:
+
+```text
+0000-0002-...
+= Alexis Sanderson
+
+Sanderson authored:
+X
+Y
+Z
+```
+
+It does **not** tell a machine:
+
+```text
+Sanderson has personally inspected this claim.
+
+Sanderson endorses this reading.
+
+Sanderson considers this proposition highly certain.
+
+Sanderson rejects this inferred dependency.
+
+Sanderson reviewed this AI-generated translation.
+
+This judgment supersedes his 2004 position.
+```
+
+That second layer is much more valuable.
+
+---
+
+### 2. Crossref + DataCite are building the **research provenance substrate**
+
+This is incredibly relevant to Pāṭala.
+
+Crossref now explicitly talks about a **Research Nexus** connecting:
+
+* works;
+* authors;
+* versions;
+* corrections;
+* translations;
+* data;
+* supplements;
+* relationships.
+
+Crossref describes these relationships as establishing provenance over time and has separately identified metadata relationships as important trust signals for the scholarly record. ([www.crossref.org][3])
+
+And their July 2026 policy work emphasizes that persistent identifiers aren't merely links: records can be continually corrected, enriched and stewarded. ([www.crossref.org][4])
+
+That's extremely close to the lower-level infrastructure Pāṭala needs.
+
+But Crossref deliberately doesn't answer:
+
+> **Is Sanderson actually correct about this interpretation of Jayadrathayāmala?**
+
+It records the scholarly record.
+
+It doesn't build an epistemic graph over it.
+
+---
+
+### 3. Open Research Knowledge Graph is close to your **structured-scholarship** idea
+
+ORKG represents papers as machine-actionable scholarly knowledge rather than merely PDFs.
+
+It can create structured representations of important information from papers, assign persistent identifiers to those representations, preserve versions, and connect them to researchers and other research objects. ([arXiv][5])
+
+That's a serious precedent for:
+
+```text
+paper
+ ↓
+structured claims
+ ↓
+machine-readable scholarly object
+```
+
+But again, it doesn't create the economic/verification network we're imagining.
+
+---
+
+# 4. OpenReview solved a surprising amount of **signed scholarly activity**
+
+OpenReview's underlying object model is unusually relevant.
+
+It represents:
+
+```text
+submission
+review
+comment
+official response
+rating
+profile
+```
+
+as structured objects, and identities/profiles represent authors, reviewers and chairs. ([OpenReview Docs][6])
+
+Its data model even uses **signatures** to identify the entities responsible for certain scholarly objects. ([OpenReview][7])
+
+That gets us considerably closer:
+
+```text
+PERSON
+   ↓ signed
+REVIEW
+   ↓ evaluates
+PAPER
+```
+
+But OpenReview is largely a publishing/review workflow.
+
+Pāṭala would move the signature **inside the paper**:
+
+```text
+PERSON
+ ↓
+JUDGMENT
+ ↓
+CLAIM
+ ↓
+WARRANT
+ ↓
+PASSAGE
+ ↓
+MANUSCRIPT
+```
+
+Huge difference.
+
+---
+
+# 5. PREreview is building **reviewer reputation**
+
+PREreview lets researchers publicly review preprints, authenticate with ORCID and write their review contributions back to the peer-review section of their ORCID profile. ([PREreview Blog][8])
+
+So:
+
+```text
+scholar
+ ↓
+performs verification work
+ ↓
+public review
+ ↓
+gets persistent credit
+```
+
+already exists.
+
+PREreview explicitly frames this as making normally invisible scholarly labor recognizable. ([PREreview Blog][8])
+
+That is one of the foundations of your idea.
+
+---
+
+# 6. Peer Community In gets even closer to the **stamp**
+
+PCI is fascinating.
+
+A community of experts evaluates an openly available preprint. If it passes, PCI produces a public recommendation.
+
+That recommendation is explicitly a **scientific endorsement that can itself be cited independently**. ([Peer Community In][9])
+
+PCI currently reports more than:
+
+* 6,000 public peer reviews;
+* 1,000 recommended preprints;
+* 2,800 recommenders;
+* 21 thematic communities.
+
+And the final recommendation is overseen by established researchers. ([Peer Community In][10])
+
+That's very close to:
+
+> **“expert stamp of approval.”**
+
+But it's still mostly:
+
+```text
+EXPERT COMMUNITY
+       ↓
+    PAPER ✓
+```
+
+Pāṭala wants:
+
+```text
+EXPERT
+ ↓
+claim A ✓
+
+claim B ✓ with qualification
+
+claim C ? unresolved
+
+translation D ✓
+
+reading E rejected
+
+argument F valid but premise disputed
+```
+
+That granularity matters enormously for AI.
+
+---
+
+# 7. And someone has now started **paying people to verify research**
+
+This is probably the closest economic precedent.
+
+## ResearchHub
+
+ResearchHub currently pays approximately **$150 equivalent in ResearchCoin for an approved high-quality peer review**, with up to two paid reviews per paper under its review program. It also supports user-funded peer-review bounties. ([ResearchHub Docs][11])
+
+So the idea:
+
+> verification is valuable labor and experts should be paid
+
+is already being tested commercially.
+
+And there is a striking AI connection.
+
+ResearchHub's current terms explicitly contemplate licensing compensated peer-review content for:
+
+* AI training;
+* model evaluation;
+* grounding;
+* datasets;
+* commercial AI-development partnerships.
+
+The reviewer retains ownership, while ResearchHub receives broad exploitation/licensing rights to the review under its current terms. ([ResearchHub][12])
+
+That means somebody has basically already noticed:
+
+> **high-quality human expert evaluation becomes valuable training/grounding data for AI.**
+
+That's a major validation of your intuition.
+
+---
+
+# 8. VeriMe may be an even bigger signal
+
+This is very new.
+
+**Laure Haak, the founding executive director of ORCID, is now involved in VeriMe Cooperative**, which is working specifically on **verified researcher identity**. It has already partnered with Dryad on researcher identity-verification workflows. ([Publication Ethics][13])
+
+The direction is:
+
+```text
+ORCID:
+"I claim I am researcher X"
+
+        ↓
+
+VeriMe:
+"researcher X's identity has been verified"
+```
+
+And its wider concept involves letting researchers connect verified identities to research systems and reputational services. ([VERIME Cooperative][14])
+
+Notice what's happening.
+
+The ecosystem is slowly assembling:
+
+```text
+ORCID
+identity
+
+VeriMe
+verified identity
+
+Crossref/DataCite
+objects + provenance
+
+ORKG
+structured scholarly knowledge
+
+PREreview
+credited expert review
+
+PCI
+public expert endorsement
+
+ResearchHub
+paid verification
+```
+
+Nobody owns the entire stack.
+
+---
+
+# Then I found something even more striking
+
+There are **multiple papers from just the last few months explicitly arguing toward the Pāṭala problem.**
+
+## F(AI)²R — July 2026
+
+The paper is literally titled:
+
+**“Who Did What, and Who Checked? Verifiable AI Provenance as an Executable Skill.”**
+
+Its model records every claim/source/activity in a provenance graph.
+
+And its crucial invariant is:
+
+> verification levels can only be granted by humans.
+
+([arXiv][15])
+
+That's extraordinarily close to the philosophy behind the argument/audit infrastructure we're already building.
+
+---
+
+## Traceable Scholarship — July 2026
+
+Another brand-new paper specifically addresses **humanistic scholarship under generative AI**.
+
+It argues that AI-generated scholarship needs:
+
+* page-level anchors;
+* explicit evidence;
+* citation-first generation;
+* `NO_EVIDENCE`;
+* human verification;
+* graded compliance;
+* explicit scope boundaries.
+
+([arXiv][16])
+
+That's almost uncannily aligned with the Pāṭala direction.
+
+And importantly: it's **humanities**, rather than biomedical/scientific research.
+
+---
+
+## INSPECT-AI — August 2026
+
+Another project uses LLM assistance plus a provenance knowledge graph to record **expert research-integrity assessments**.
+
+Its initial knowledge graph reportedly contains 140 expert assessments over 95 clinical-trial publications. ([arXiv][17])
+
+Again:
+
+```text
+AI does scaling
+
+human does judgment
+
+graph records provenance
+```
+
+The pattern is appearing independently.
+
+---
+
+# So why hasn't anyone built the complete thing?
+
+I think there are **six structural reasons**.
+
+## 1. Until AI, verification wasn't the scarce resource
+
+Previously:
+
+```text
+writing paper = expensive
+copying paper = cheap
+```
+
+Therefore scholarly prestige centered on **production**.
+
+AI changes the economics:
+
+```text
+generate plausible claim      ≈ near zero marginal cost
+generate plausible essay      ≈ near zero
+generate translation          ≈ near zero
+generate argument             ≈ near zero
+
+KNOW WHETHER IT'S RIGHT        expensive
+```
+
+That inversion is enormous.
+
+The scarce commodity moves from:
+
+> content
+
+toward:
+
+> **credible judgment.**
+
+That is partly an inference, but the appearance of human-verification/provenance systems in current 2026 research is strong evidence that others are encountering the same problem. ([arXiv][1])
+
+---
+
+# 2. Academia never rewarded verification properly
+
+Traditional academic incentives overwhelmingly make the paper the prestigious object.
+
+Reviewing somebody else's work is often effectively invisible labor.
+
+PREreview is explicitly attempting to make review contributions appear on ORCID, while PCI and ResearchHub are experimenting with alternative recognition and compensation systems. ([PREreview Blog][8])
+
+So historically:
+
+```text
+write paper → career capital
+
+verify 40 Sanskrit readings → 🤷
+```
+
+Pāṭala can invert that.
+
+---
+
+# 3. Claim extraction used to be prohibitively expensive
+
+Imagine manually transforming Sanderson's *Śaiva Age* into:
+
+```text
+8,000 propositions
+12,000 citations
+2,000 source dependencies
+600 chronology assertions
+300 contested claims
+...
+```
+
+Impossible economically.
+
+LLMs can now do the **candidate extraction**.
+
+Humans merely inspect the parts that require expertise.
+
+That's a radically different cost structure.
+
+---
+
+# 4. You need persistent identity first
+
+You can't build:
+
+```text
+Sanderson VERIFIED proposition X
+```
+
+unless you can reliably establish:
+
+```text
+this is actually Sanderson
+```
+
+ORCID matured the persistent-identity layer; VeriMe is now explicitly tackling stronger researcher identity verification. ([ORCID][2])
+
+The stack wasn't ready 15 years ago.
+
+---
+
+# 5. Reputation systems are dangerous
+
+Suppose we produce:
+
+```text
+Sanderson score: 97.4
+Goodall score:   96.2
+Random scholar:  41.8
+```
+
+Terrible idea.
+
+You immediately introduce:
+
+* popularity bias;
+* prestige lock-in;
+* citation cartels;
+* disciplinary politics;
+* Sybil attacks;
+* review gaming;
+* Matthew effects;
+* silencing legitimate dissidents.
+
+The existing systems mostly avoid this by recording **activities and endorsements** rather than attempting to compute a universal truth score.
+
+Pāṭala should do the same.
+
+Don't score the scholar.
+
+Score/record **the relationship**.
+
+---
+
+# That's an extremely important design principle
+
+Not:
+
+> **Alexis Sanderson = 98% trustworthy.**
+
+Instead:
+
+```text
+CLAIM C2381
+
+Sanderson:
+SUPPORTED
+
+Goodall:
+SUPPORTED_WITH_QUALIFICATION
+
+Törzsök:
+NOT_REVIEWED
+
+Ratié:
+NOT_IN_DOMAIN
+
+Evidence:
+MS A fol. 43r
+MS B fol. 91v
+Inscription X
+
+Audit:
+2 independent reviewers
+
+State:
+SCHOLARLY_CORROBORATION
+```
+
+The scholar's reputation emerges contextually.
+
+That fits the architecture we've already been developing far better than global reputation points.
+
+---
+
+# 6. Nobody previously had an obvious way to monetize the downstream provenance
+
+This may be the missing innovation.
+
+ResearchHub pays for the **review itself**. ([ResearchHub Docs][11])
+
+You are proposing something different:
+
+> **Keep the provenance edge alive forever.**
+
+Suppose:
+
+```text
+Sanderson judgment
+      ↓
+Pāṭala proposition
+      ↓
+translation
+      ↓
+research agent
+      ↓
+article
+      ↓
+YouTube documentary
+      ↓
+course
+      ↓
+AI answer
+```
+
+Every edge remains identifiable.
+
+Now verification isn't merely:
+
+```text
+JOB → $150
+```
+
+It potentially becomes:
+
+```text
+INTELLECTUAL CONTRIBUTION
+         ↓
+persistent provenance
+         ↓
+downstream usage
+         ↓
+credit / reputation / money
+```
+
+**I found no mature scholarly platform doing this full provenance-to-revenue loop.**
+
+That's the genuinely interesting whitespace.
+
+---
+
+# And I think your AI intuition is basically right
+
+The future hierarchy may become something like:
+
+```text
+LEVEL 0
+AI generated
+
+LEVEL 1
+AI generated + citations
+
+LEVEL 2
+citations resolve to actual evidence
+
+LEVEL 3
+argument/evidence mechanically audited
+
+LEVEL 4
+qualified human reviewed
+
+LEVEL 5
+named domain expert reviewed
+
+LEVEL 6
+multiple independent experts corroborated
+
+LEVEL 7
+living scholarly consensus / canonical reference
+```
+
+But critically:
+
+**higher ≠ true.**
+
+It means:
+
+> increasingly accountable evidence and verification.
+
+A brilliant new claim may initially sit at level 2 while a false orthodox belief sits at level 6.
+
+That's why Pāṭala should preserve:
+
+```text
+evidence
+warrant
+reviewer
+date
+scope
+confidence
+defeaters
+dissent
+version
+```
+
+rather than collapsing everything into ✓.
+
+---
+
+# The economics become fascinating
+
+AI causes an **abundance of inference**.
+
+Human expertise supplies **scarcity of accountable judgment**.
+
+So:
+
+[
+\text{Value of expert verification}
+\propto
+\frac{\text{synthetic claims generated}}
+{\text{qualified humans able to adjudicate them}}
+]
+
+Not literally as a measured law—but directionally that's the economic hypothesis.
+
+For Sanskrit Tantra this asymmetry is insane.
+
+You might eventually have:
+
+```text
+10,000,000 AI agents capable of translating Sanskrit
+
+versus
+
+perhaps dozens of living scholars
+capable of adjudicating a genuinely difficult
+9th-century Śaiva manuscript reading
+```
+
+The model does the abundant work.
+
+**The scholar supplies the scarce bit.**
+
+---
+
+# Which means the scholar doesn't lose value to AI
+
+At the top of the epistemic stack, they potentially become **more valuable**.
+
+Before:
+
+```text
+Scholar writes translation.
+Reader consumes translation.
+```
+
+After:
+
+```text
+                     ┌ AI translation
+                     ├ AI commentary
+PRIMARY TEXT ────────┼ AI arguments
+                     ├ AI educational media
+                     ├ AI research
+                     └ AI synthesis
+                           │
+                           ▼
+                NEEDS TRUST ANCHOR
+                           │
+                           ▼
+                       SCHOLAR
+```
+
+One expert judgment could propagate into millions of machine interactions.
+
+The important economic question becomes:
+
+> **Who captures the value of that judgment?**
+
+If we don't deliberately build anything, probably the model/platform provider.
+
+Pāṭala can make the alternative:
+
+> **the scholar does.**
+
+---
+
+# And Tantra is almost bizarrely good as the wedge
+
+Compare launching:
+
+> “A universal verification network for all scholarship.”
+
+Impossible cold start.
+
+Versus:
+
+> **“We are establishing the authoritative digital scholarly layer for tantric textual studies.”**
+
+You can actually enumerate:
+
+* scholars;
+* texts;
+* manuscripts;
+* editions;
+* translations;
+* arguments;
+* journals;
+* institutions.
+
+And the field has exactly the characteristics that make verification valuable:
+
+**tiny expert pool + difficult languages + manuscript variation + contested dating + inaccessible scholarship + extremely high hallucination risk + rapidly improving AI translation.**
+
+That is an unusually strong test environment.
+
+---
+
+# The architecture I now think Pāṭala should aim at
+
+Not Academia.
+
+Not Wikipedia.
+
+Not a journal.
+
+Not merely a knowledge graph.
+
+### **Pāṭala = Proof-of-Scholarship infrastructure.**
+
+Something like:
+
+```text
+             PRIMARY EVIDENCE
+                   │
+             manuscript/text
+                   │
+                   ▼
+              PROPOSITION
+             /     │      \
+        evidence warrant defeater
+                   │
+                   ▼
+               ARGUMENT
+                   │
+          ┌────────┴────────┐
+          ▼                 ▼
+      AI AUDIT        HUMAN AUDIT
+                            │
+                     signed ORCID
+                            │
+                     expert identity
+                            │
+                     contextual stamp
+                            │
+                            ▼
+                    VERIFIED OBJECT
+                            │
+         ┌──────────────────┼────────────────┐
+         ▼                  ▼                ▼
+       human               AI              media
+      research            agents           content
+         │                  │                │
+         └──────────────────┼────────────────┘
+                            ▼
+                      USAGE GRAPH
+                            │
+                            ▼
+                  SCHOLAR ATTRIBUTION
+                            │
+                            ▼
+                   SCHOLAR DIVIDEND
+```
+
+Every piece now has a precedent.
+
+**The integration doesn't.**
+
+And the timing is notable: VeriMe appeared around verified research identity, ResearchHub is directly paying reviewers, Crossref is explicitly talking about trust/provenance relationships, and multiple papers in **July–August 2026** are independently proposing human-verification/provenance graphs for AI-assisted scholarship. ([VERIME Cooperative][14])
+
+That makes me much more convinced that the **verification layer**, rather than merely translation or corpus access, is the important long-term Pāṭala bet.
+
+[1]: https://arxiv.org/html/2607.25637v2?utm_source=chatgpt.com "F(AI) 2 R: Who Did What, and Who Checked? Verifiable AI ..."
+[2]: https://orcid.org/?utm_source=chatgpt.com "ORCID iD"
+[3]: https://www.crossref.org/documentation/research-nexus/?utm_source=chatgpt.com "Documentation - The Research Nexus"
+[4]: https://www.crossref.org/publications/pid-position-paper-july-2026.pdf?utm_source=chatgpt.com "Persistent identifiers in research infrastructure policy"
+[5]: https://arxiv.org/abs/2209.08789?utm_source=chatgpt.com "Persistent Identification and Interlinking of FAIR Scholarly Knowledge"
+[6]: https://docs.openreview.net/getting-started/objects-in-openreview/introduction-to-notes?utm_source=chatgpt.com "Introduction to Notes"
+[7]: https://openreview.net/legal/terms?utm_source=chatgpt.com "OpenReview Terms of Use"
+[8]: https://content.prereview.org/prereview-gives-you-credit-on-orcid/?utm_source=chatgpt.com "PREreview gives you credit for your public review activity ..."
+[9]: https://peercommunityin.org/2024/06/24/direct-preprint-submission-to-pci-from-biorxiv/?utm_source=chatgpt.com "Direct Preprint Submission to PCI from bioRxiv"
+[10]: https://peercommunityin.org/?utm_source=chatgpt.com "Peer Community In - free peer review & validation of preprints ..."
+[11]: https://docs.researchhub.com/researchhub-foundation/programs-and-initiatives/peer-review-program/peer-review-guidelines?utm_source=chatgpt.com "Peer Review Guidelines | ResearchHub Docs"
+[12]: https://www.researchhub.com/tos?utm_source=chatgpt.com "Terms of Service"
+[13]: https://publicationethics.org/guidance/seminar-and-webinar/trust-markers-and-researcher-identity-community-perspectives?utm_source=chatgpt.com "Trust markers and researcher identity: Community ..."
+[14]: https://verime.coop/blog?utm_source=chatgpt.com "Blog"
+[15]: https://arxiv.org/abs/2607.25637?utm_source=chatgpt.com "F(AI)2R: Who Did What, and Who Checked? Verifiable AI Provenance as an Executable Skill"
+[16]: https://arxiv.org/abs/2607.20916?utm_source=chatgpt.com "Traceable Scholarship: Page Anchors and Ariadne's Thread for Humanistic Inquiry in the Age of Generative AI"
+[17]: https://arxiv.org/abs/2608.07202?utm_source=chatgpt.com "Authoring and Management of Transparent Research Integrity Assessments of Randomised Clinical Trial Publications Using LLM-assisted Tools and Provenance Knowledge Graphs"

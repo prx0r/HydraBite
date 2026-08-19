@@ -1,0 +1,3131 @@
+OpenPāṭala Hardening Review — companion to the canonical design
+
+The previous design is directionally right, but I would not freeze it yet. There are several places where it would become painful after ingesting millions of records.
+
+The central correction is:
+
+Pāṭala’s permanent truth must not be today’s JSON schema, today’s Postgres tables, today’s hashes, or today’s ontology.
+
+The permanent truth is stable identity + original observations/artifacts + append-only semantic events + provenance + immutable historical schemas.
+
+Everything else is a projection.
+
+That is how you make it survivable through 10 years of schema changes, better models, database migrations, new scholarship, Greek expansion, manuscript partnerships and whatever replaces current agent infrastructure.
+
+⸻
+
+1. The most important distinction
+
+There are four completely different things we have been partially conflating:
+
+IDENTITY
+"What thing are we talking about?"
+CONTENT
+"What exact bytes/state did we observe?"
+INTERPRETATION
+"What do we currently believe those observations mean?"
+REPRESENTATION
+"How are we exposing that belief today?"
+
+These must be separable.
+
+Therefore:
+
+Stable Entity ID
+    ≠
+Content hash
+    ≠
+Object version ID
+    ≠
+Database primary-key semantics
+    ≠
+API representation
+
+That is the single biggest future-proofing decision.
+
+⸻
+
+2. Do NOT make hashes your permanent IDs
+
+I previously leaned too hard toward content-addressed identities.
+
+That is correct for blobs.
+
+It is wrong for scholarly entities.
+
+A manuscript remains the same manuscript if you acquire a better photograph.
+
+A Work remains the same Work if its title changes.
+
+A Translation remains the same intellectual translation if you correct metadata.
+
+A Pāṭala assertion remains addressable even if later rejected.
+
+Use opaque entity IDs.
+
+I would now use RFC-standard UUIDv7 internally because it is distributed, time-ordered and has much better index locality than random UUIDv4; RFC 9562 specifically recommends UUIDv7 for new time-ordered UUID use cases. 
+
+For humans/API:
+
+PTW_019c...
+PTP_019c...
+PTED_019c...
+PTMS_019c...
+PTTR_019c...
+PTOBS_019c...
+PTEVT_019c...
+
+Prefix = convenience.
+
+UUID = identity.
+
+Never encode:
+
+work title
+source
+tradition
+SHA
+date
+version
+
+inside the identity.
+
+Those things change.
+
+⸻
+
+3. Hashes become a DigestSet
+
+Every thing that can have bytes gets:
+
+Digest {
+    algorithm: str
+    value: str
+    encoding: "hex"
+    canonicalization: str | None
+}
+
+and:
+
+DigestSet {
+    digests: list[Digest]
+}
+
+Example:
+
+{
+  "digests": [
+    {
+      "algorithm": "sha256",
+      "value": "...",
+      "encoding": "hex",
+      "canonicalization": null
+    },
+    {
+      "algorithm": "sha512",
+      "value": "...",
+      "encoding": "hex",
+      "canonicalization": null
+    }
+  ]
+}
+
+Why?
+
+Because cryptography changes.
+
+OCFL 1.1 explicitly requires SHA-256 or SHA-512 for content addressing and recommends SHA-512, while its fixity model supports retaining additional/legacy digests and even describes moving an existing object from one preferred digest algorithm to another without changing the historical content. 
+
+So:
+
+Artifact ID
+PTART_019...
+2026:
+sha256 = A
+sha512 = B
+2035:
+sha512 = B
+future_hash = C
+
+The Artifact ID does not change.
+
+That is crypto agility.
+
+⸻
+
+4. Three different hashes
+
+This matters enormously for Sanskrit.
+
+A. Raw-byte hash
+
+Hash exactly what came from the provider.
+
+raw_sha512
+
+No decoding.
+
+No NFC.
+
+No whitespace changes.
+
+No fixing line endings.
+
+This proves:
+
+these are the exact bytes Pāṭala observed.
+
+⸻
+
+B. Canonical structured-record hash
+
+JSON has multiple byte representations of the same object.
+
+This:
+
+{"x":1,"y":2}
+
+and:
+
+{
+  "y": 2,
+  "x": 1
+}
+
+represent the same object but have different byte hashes.
+
+So don’t use:
+
+hash(json.dumps(obj))
+
+as a protocol.
+
+Use an actual canonicalization specification.
+
+RFC 8785 defines the JSON Canonicalization Scheme specifically so cryptographic hashes/signatures can be calculated reproducibly across implementations. 
+
+Therefore:
+
+canonical JSON
+    ↓
+RFC 8785 JCS
+    ↓
+SHA-512
+
+for Pāṭala structured-state digests.
+
+⸻
+
+C. Semantic/normalized text fingerprint
+
+Completely separate.
+
+Example:
+
+Unicode NFC
++ Sanskrit punctuation normalization
++ spacing normalization
++ transliteration normalization
+
+might give:
+
+normalized_text_fingerprint
+
+Useful for duplicate detection.
+
+But never confuse it with fixity.
+
+A normalized fingerprint tells you:
+
+these texts probably represent substantially the same textual content.
+
+A byte digest tells you:
+
+these bytes are literally identical.
+
+Those statements are radically different.
+
+⸻
+
+5. Important Sanskrit Unicode trap
+
+RFC 8785 deliberately does not perform Unicode normalization; string content must remain as represented. 
+
+Good.
+
+Do not secretly NFC-normalize before integrity hashing.
+
+Instead:
+
+Artifact.raw_digest
+
+hashes original bytes.
+
+Then explicitly derive:
+
+NormalizedText
+
+using:
+
+normalizer:
+    patala.sanskrit-unicode/v3
+
+and hash that separately.
+
+That leaves an inspectable transformation:
+
+RAW BYTES
+   │
+   │ SanskritUnicodeNormalizer v3
+   ▼
+NORMALIZED TEXT
+
+instead of silently modifying reality.
+
+⸻
+
+6. The truly permanent database should be much smaller than our ontology
+
+This is perhaps the biggest architectural improvement.
+
+We have been designing dozens of domain tables:
+
+Work
+Edition
+Witness
+Translation
+EText
+Passage
+Assertion
+...
+
+Those are useful.
+
+But I would not make those tables the irreducible historical store.
+
+Make the irreducible layer tiny:
+
+entity_identity
+event
+artifact
+artifact_digest
+schema_definition
+ledger_checkpoint
+
+Then domain tables are projections.
+
+Conceptually:
+
+        PERMANENT CORE
+              │
+ ┌────────────┼────────────┐
+ │            │            │
+events    artifacts     schemas
+ │            │            │
+ └────────────┼────────────┘
+              ▼
+        PROJECTION ENGINE
+              │
+ ┌────────────┼──────────────┐
+ ▼            ▼              ▼
+Postgres   Parquet/API     RDF/JSON
+Atlas       snapshots      adapters
+
+⸻
+
+7. entity_identity
+
+Minimal.
+
+EntityIdentity {
+    id: UUIDv7
+    entity_class:
+        WORK
+        PERSON
+        INSTITUTION
+        EDITION
+        WITNESS
+        SURROGATE
+        ETEXT
+        TRANSLATION
+        PASSAGE
+        ASSERTION
+        OBSERVATION
+        ...
+    created_event_id
+    lifecycle:
+        ACTIVE
+        MERGED
+        SPLIT
+        RETIRED
+        WITHDRAWN
+}
+
+Nothing else needs to be permanent here.
+
+⸻
+
+8. The event is the real durable semantic record
+
+Event {
+    event_id
+    event_type
+    stream_id?
+    entity_ids[]
+    schema_uri
+    actor_id
+    recorded_at
+    effective_at?
+    payload
+    payload_digest
+    derivation_refs[]
+    run_id?
+}
+
+An event says:
+
+Something happened.
+
+Not:
+
+Here is the current state of the world.
+
+Examples:
+
+EntityCreated
+RawObservationRecorded
+ArtifactCaptured
+AssertionProposed
+AssertionAccepted
+AssertionRejected
+AssertionRetracted
+ExternalIdentifierLinked
+EditionLinkedToWork
+EntityMerged
+EntitySplit
+RightsAssessmentRecorded
+TranslationLocated
+TranslationGenerated
+ScholarAttestationRecorded
+SchemaPublished
+ProjectionPublished
+
+⸻
+
+9. Do not mutate events
+
+Suppose on August 17 2026:
+
+Archive.org claims:
+author = X
+
+and six months later you discover that is wrong.
+
+Do not:
+
+UPDATE assertion SET author='Y'
+
+You append:
+
+Assertion A
+X authored Work W
+then
+AssertionRetracted(A)
+then
+Assertion B
+Y authored Work W
+
+Current state says Y.
+
+History says exactly what happened.
+
+⸻
+
+10. This solves the scary question you asked
+
+What if we ingest millions of records and later realise our schema is wrong?
+
+That’s completely survivable if the original records/events remain immutable.
+
+Example.
+
+2026 schema
+
+Perhaps idiotically:
+
+WorkV1 {
+    title
+    author_id
+}
+
+Then by 2027 you correctly realise:
+
+authorship is contested
+multiple authors possible
+roles vary
+authorship claims need evidence
+
+You do not migrate historical truth into oblivion.
+
+Publish:
+
+https://schemas.patala.org/atlas/work/2.0.0
+
+where:
+
+WorkV2 {
+    preferred_title
+}
+
+and authorship becomes:
+
+Assertion
+    subject = Work
+    predicate = AUTHORED_BY
+
+Then write an explicit migration:
+
+WorkV1 → WorkV2
+
+which converts:
+
+v1.author_id
+
+into:
+
+AuthorshipAssertion {
+    source = LEGACY_SCHEMA_MIGRATION
+    source_event = ...
+}
+
+Your old historical object still exists exactly as written.
+
+Your new projection is better.
+
+⸻
+
+11. The rule should be
+
+Never migrate history. Migrate interpretation.
+
+That sentence should probably go into the Pāṭala constitution.
+
+⸻
+
+12. Append-only schema registry
+
+Every schema that has ever written permanent data must remain available.
+
+schemas.patala.org/
+    core/
+        event/
+            1.0.0/
+            1.1.0/
+    atlas/
+        work/
+            1.0.0/
+            2.0.0/
+        assertion/
+            1.0.0/
+            1.1.0/
+
+Every record stores:
+
+{
+  "schema_uri":
+    "https://schemas.patala.org/atlas/assertion/1.1.0/schema.json"
+}
+
+JSON Schema explicitly recommends declaring the $schema dialect and a stable $id for a schema. This matters because JSON Schema drafts themselves have included breaking behavioral changes. 
+
+Therefore each Pāṭala schema contains:
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.patala.org/atlas/assertion/1.1.0/schema.json"
+}
+
+Never:
+
+schema = "latest"
+
+inside permanent data.
+
+latest can exist as documentation redirect only.
+
+⸻
+
+13. Schema versions themselves must be immutable
+
+Once:
+
+assertion/1.2.0
+
+has written one permanent record:
+
+that schema is frozen.
+
+If you made a mistake:
+
+assertion/1.2.1
+
+or:
+
+assertion/2.0.0
+
+Do not edit the existing file and keep the same version.
+
+Also hash the schema itself.
+
+SchemaDefinition {
+    uri
+    family
+    version
+    schema_dialect
+    artifact_id
+    digest_set
+    published_at
+    supersedes?
+}
+
+⸻
+
+14. Define Pāṭala compatibility rules
+
+I’d use semantic versioning, but define it more strictly than normal software SemVer.
+
+PATCH
+
+1.2.0 → 1.2.1
+
+Only:
+
+description
+examples
+documentation
+annotations
+
+No validation or semantic behavior change.
+
+MINOR
+
+1.2 → 1.3
+
+Backward-readable additions:
+
+new OPTIONAL property
+new OPTIONAL relationship
+new extension metadata
+
+MAJOR
+
+1 → 2
+
+Anything like:
+
+required field change
+type change
+meaning change
+relationship semantics change
+structural redesign
+
+⸻
+
+15. Never reuse a retired field semantically
+
+Protocol Buffers has learned this the painful way: removed field numbers should be reserved and not later reused for different meanings, because old serialized data may still contain them. 
+
+Use the analogous Pāṭala rule.
+
+If:
+
+Work.author
+
+dies:
+
+reserve:
+
+author
+
+within that schema family.
+
+Don’t bring it back in 2031 meaning:
+
+"primary modern editor"
+
+That’s how archival datasets become incomprehensible.
+
+⸻
+
+16. Enum evolution is more dangerous than it looks
+
+Suppose:
+
+rights:
+    OPEN
+    CLOSED
+
+Then add:
+
+UNKNOWN
+FAIR_USE
+COMPUTE_ONLY
+
+Some client code will have:
+
+if status == OPEN:
+    ...
+else:
+    closed()
+
+and silently misinterpret new cases.
+
+So prefer:
+
+controlled string vocabularies
+
+plus:
+
+UNKNOWN
+OTHER
+
+and require API clients to tolerate unknown values.
+
+Do not make consumers assume the enum is permanently closed.
+
+⸻
+
+17. Strict core + extension namespace
+
+You do want schemas strict enough to catch typos.
+
+So:
+
+"unevaluatedProperties": false
+
+for owned fields.
+
+But include:
+
+"extensions": {
+    "type": "object"
+}
+
+for provider/domain-specific data.
+
+For example:
+
+{
+  "extensions": {
+    "fojin": {...},
+    "pandit": {...}
+  }
+}
+
+External information can survive even before Pāṭala understands it.
+
+That is important for ingestion.
+
+⸻
+
+18. Preserve original source payloads forever
+
+This is the ultimate schema escape hatch.
+
+Suppose PANDiT gives you:
+
+{
+   127 weird fields
+}
+
+and your 2026 adapter recognizes only 20.
+
+Do not discard the other 107.
+
+Store the exact API response as an Artifact/RawObservation.
+
+Then:
+
+Extractor v1
+→ 20 assertions
+
+In 2029:
+
+Extractor v7
+
+can replay the same raw source artifact and discover 50 more useful assertions.
+
+That ability is enormously valuable.
+
+⸻
+
+19. Reprocessing is better than migration
+
+This should become a major Pāṭala concept.
+
+ReprocessingRun {
+    id
+    source_observation_ids[]
+    extractor_version
+    input_schema_version
+    output_schema_version
+    produced_assertions[]
+    superseded_outputs[]
+    run_provenance
+}
+
+If you discover:
+
+our 2026 slug parser incorrectly interpreted ed. as author in 300,000 records
+
+you do not manually patch 300,000 database rows.
+
+Run:
+
+Extractor v4
+
+over the immutable observations.
+
+Produce corrected CandidateAssertions.
+
+Resolver re-evaluates.
+
+Current projections update.
+
+History remains intact.
+
+⸻
+
+20. Migration also becomes first-class
+
+SchemaMigration {
+    id
+    from_schema_uri
+    to_schema_uri
+    migration_type:
+        UPCAST
+        DOWNCAST
+        REPROJECT
+    software_artifact
+    code_digest
+    deterministic
+    lossless:
+        TRUE
+        FALSE
+        UNKNOWN
+    known_information_loss[]
+    fixtures[]
+    created_at
+}
+
+This makes migration itself inspectable.
+
+⸻
+
+21. Upcasting
+
+Historical events:
+
+V1
+V1
+V2
+V3
+V1
+V3
+
+can all be projected into:
+
+current conceptual model V3
+
+using:
+
+v1 → v2
+v2 → v3
+
+during replay.
+
+The history remains:
+
+V1
+
+but applications receive:
+
+V3-shaped interpretation
+
+when necessary.
+
+⸻
+
+22. Postgres becomes disposable
+
+This sounds extreme but is correct.
+
+Your requirement should be:
+
+Given only R2 artifacts + schema registry + canonical event stream, Pāṭala can rebuild every Postgres projection from zero.
+
+If you can satisfy that:
+
+you are database-independent.
+
+Postgres → FoundationDB → Spanner → whatever exists in 2035 becomes much less frightening.
+
+⸻
+
+23. Projection schema can therefore evolve aggressively
+
+These can be ordinary SQL:
+
+work_current
+person_current
+edition_current
+translation_current
+work_completeness
+translation_availability
+source_health
+
+You can:
+
+ALTER
+DROP
+REBUILD
+REINDEX
+
+these whenever needed.
+
+Because they aren’t history.
+
+This separation is liberating.
+
+⸻
+
+24. The OpenAlex lesson
+
+OpenAlex is an excellent model for the read plane, not the epistemic archive.
+
+OpenAlex uses stable entity IDs, encourages clients to resolve names to identifiers first, supports canonical external IDs such as DOI/ORCID/ROR, and when duplicate entities are merged an old OpenAlex ID returns an HTTP 301 to the surviving ID. 
+
+Steal all of that.
+
+OpenPāṭala:
+
+PTW_old
+
+merged into:
+
+PTW_new
+
+returns:
+
+301 Location: /v1/works/PTW_new
+
+But preserve:
+
+EntityMerge {
+    from_ids
+    into_id
+    evidence
+    event_id
+    performed_by
+}
+
+⸻
+
+25. OpenAlex also gets bulk state right
+
+Its current snapshot format uses gzip-compressed JSON Lines split by entity type, with records partitioned by updated_date; the public snapshot is refreshed periodically, and it also supports more frequent change data. 
+
+Steal:
+
+bulk snapshots
+incremental changes
+simple entity-oriented files
+
+But improve the model.
+
+OpenAlex’s public snapshot documentation describes current entity records partitioned by last update, not a permanent event ledger describing every epistemic transition. 
+
+Pāṭala needs both:
+
+EVENT HISTORY
++
+CURRENT SNAPSHOT
+
+because its moat is partly how conclusions changed.
+
+⸻
+
+26. So Pāṭala gets three export surfaces
+
+Current snapshot
+
+snapshot/2027-04-01/
+works.parquet
+people.parquet
+editions.parquet
+witnesses.parquet
+translations.parquet
+assertions.parquet
+...
+
+⸻
+
+Changefiles
+
+changes/
+2027/04/01/...
+
+or:
+
+GET /v1/changes?since=<cursor>
+
+⸻
+
+Historical event archive
+
+For specialist replication/research:
+
+events/
+
+Possibly filtered where rights or privacy require.
+
+⸻
+
+27. Snapshot manifest
+
+Every snapshot gets:
+
+SnapshotManifest {
+    snapshot_id
+    state_cursor
+    created_at
+    protocol_version
+    schemas[]
+    files: [
+        {
+            path
+            rows
+            bytes
+            digests[]
+        }
+    ]
+    previous_snapshot?
+    root_digest
+    signatures[]
+}
+
+Now:
+
+“Pāṭala 2028-01 release”
+
+is actually reproducible.
+
+⸻
+
+28. Snapshots should be citable
+
+DataCite explicitly supports resource versions and relations such as:
+
+HasVersion
+IsVersionOf
+IsNewVersionOf
+IsPreviousVersionOf
+IsTranslationOf
+HasTranslation
+
+and recommends new identifiers for major resource versions when appropriate. 
+
+So eventually issue DOI releases for meaningful frozen datasets/benchmarks:
+
+Pāṭala Sanskrit Corpus 2028.1
+Pāṭala Translation Benchmark 4.0
+
+while:
+
+patala.org
+
+remains the live system.
+
+⸻
+
+29. Merge is easy. Split is harder.
+
+Most systems forget this.
+
+Suppose:
+
+PTW123
+
+was thought to be one Work.
+
+Later scholarship shows it actually conflated:
+
+PTW812
+PTW813
+
+Do not repurpose PTW123 to mean one of them.
+
+Record:
+
+EntitySplit {
+    old_id: PTW123
+    new_ids: [
+        PTW812,
+        PTW813
+    ]
+    allocation_evidence
+    unresolved_members[]
+    event_id
+}
+
+Then:
+
+GET /works/PTW123
+
+could return:
+
+409 ENTITY_SPLIT
+
+with replacements.
+
+One-to-one merge:
+
+301
+
+One-to-many split:
+
+explicit ambiguity
+
+That makes identifiers intellectually honest.
+
+⸻
+
+30. Never delete IDs
+
+Even a bad entity remains part of history.
+
+Statuses:
+
+ACTIVE
+MERGED
+SPLIT
+RETRACTED
+WITHDRAWN
+
+A citation from 2027 to:
+
+PTW123
+
+must still resolve in 2037.
+
+Maybe it resolves to:
+
+This former entity was split into X and Y in 2030.
+
+That is what a legitimate scholarly identifier system should do.
+
+⸻
+
+31. Immutability must not mean “we can never delete bytes”
+
+Important correction.
+
+There are cases where you may need to withdraw content:
+
+rights problem
+provider request
+privacy
+legal requirement
+accidental restricted upload
+
+So separate:
+
+historical fact that artifact existed
+
+from:
+
+artifact bytes currently retained
+
+Use:
+
+ArtifactAvailability {
+    artifact_id
+    state:
+        PRESENT
+        WITHDRAWN
+        PURGED
+    reason_code
+    event_id
+}
+
+If bytes must be purged, remove them.
+
+Retain non-sensitive provenance/tombstone information where lawful and appropriate.
+
+Event sourcing is not an excuse to violate deletion obligations.
+
+⸻
+
+32. Hashes do not prove truth
+
+This should be written in enormous letters.
+
+A SHA-512 digest proves:
+
+bytes have not changed relative to the digest.
+
+It does not prove:
+
+those bytes are correct.
+
+A signature proves:
+
+this key signed this message.
+
+It does not prove:
+
+the message is true.
+
+A Merkle log proves:
+
+this event was committed into this log history.
+
+It does not prove:
+
+the assertion was scholarly sound.
+
+Keep:
+
+FIXITY
+AUTHENTICITY
+PROVENANCE
+AUTHORITY
+TRUTH
+
+separate.
+
+⸻
+
+33. Our current event-chain design also needs improvement
+
+A naive:
+
+event.prev_hash
+
+global chain becomes painful under concurrency.
+
+You already had a version of exactly this race in the old registry design: reading the current tail and then appending without one atomic critical section makes competing writers capable of basing events on the same tail.
+
+Do not solve distributed integrity with a global JSONL chain.
+
+Use batches + Merkle checkpoints.
+
+⸻
+
+34. Better ledger design
+
+Events commit normally into Postgres.
+
+Periodically:
+
+all uncheckpointed events
+        ↓
+sort deterministically
+        ↓
+event digest leaves
+        ↓
+Merkle tree
+        ↓
+root hash
+
+Then:
+
+LedgerCheckpoint {
+    id
+    previous_checkpoint_id?
+    first_event_cursor
+    last_event_cursor
+    event_count
+    merkle_algorithm
+    merkle_root
+    generated_at
+    signatures[]
+}
+
+⸻
+
+35. Why Merkle checkpoints
+
+Sigstore’s Rekor uses an append-only transparency log whose state is represented by cryptographically verifiable Merkle trees and signed tree heads. 
+
+You do not need to copy Rekor.
+
+Steal the principle:
+
+many events
+→ one independently verifiable root
+
+instead of signing every row.
+
+⸻
+
+36. Sign checkpoints, not everything
+
+Something like:
+
+Signature {
+    algorithm
+    key_id
+    signature
+    signed_digest
+    signed_at
+}
+
+Algorithm-tagged.
+
+Don’t bake:
+
+ed25519 forever
+
+into Pāṭala.
+
+Allow:
+
+signature A
+signature B
+future signature C
+
+over the same root.
+
+Old signatures remain evidence.
+
+New algorithms can be added later.
+
+⸻
+
+37. Independent checkpoints matter
+
+If Pāṭala controls:
+
+database
+hashes
+signing key
+server
+
+then sophisticated tampering could alter all four.
+
+Periodically publish the checkpoint root independently.
+
+Potentially:
+
+Git release
+external archival record
+institutional mirror
+public transparency mechanism
+
+Then rewriting history requires rewriting all independently observed checkpoints.
+
+No blockchain required.
+
+⸻
+
+38. OCFL is useful, but I would not use it blindly
+
+OCFL is designed specifically for transparent long-term preservation of versioned digital objects; its inventories track versions and content digests while prior object versions remain immutable. 
+
+I would borrow a lot.
+
+But wrapping each tiny HTML response in an individual OCFL object is unnecessary overhead.
+
+Use:
+
+Individual fetched content
+
+Simple content-addressed blob store:
+
+R2
+/blobs/sha512/ab/cd/<digest>
+
+with Artifact metadata in Postgres/event history.
+
+Compound archival objects
+
+Use OCFL-compatible packaging where it genuinely fits:
+
+manuscript acquisition
+provider dumps
+dataset releases
+snapshot releases
+complex TEI + images + metadata packages
+
+This gets you preservation interoperability without drowning the hot ingestion path in archive packaging.
+
+⸻
+
+39. Raw R2 structure therefore becomes disposable too
+
+The canonical artifact record says:
+
+Artifact PTART123
+digests:
+sha512=X
+sha256=Y
+
+The current storage locator might say:
+
+r2://bucket/blobs/sha512/X
+
+Later:
+
+s3://...
+
+or:
+
+institutional preservation repository
+
+The Artifact ID doesn’t change.
+
+Storage location is metadata.
+
+⸻
+
+40. Exact derivation provenance
+
+PROV-O’s foundational distinction is extremely useful:
+
+Entity
+Activity
+Agent
+
+with relationships such as derivation, generation, attribution and use. 
+
+Do not rebuild Pāṭala internally as RDF.
+
+But ensure every transformation can export cleanly to PROV.
+
+Internal:
+
+DerivationActivity {
+    id
+    activity_type
+    inputs[]
+    outputs[]
+    actor_id
+    software
+    configuration
+    started_at
+    ended_at
+    run_id
+}
+
+External adapter:
+
+DerivationActivity → prov:Activity
+Artifact/ObjectVersion → prov:Entity
+Agent/Scholar/Software → prov:Agent
+
+Perfect.
+
+⸻
+
+41. SLSA has another excellent mechanism to steal
+
+Modern software provenance records:
+
+subject artifact
+builder
+build definition
+inputs/materials
+output digest
+
+so consumers can determine what produced an artifact. 
+
+Apply the same pattern to Factory/Eval.
+
+DerivationAttestation {
+    subject_ids[]
+    builder
+    process_type
+    inputs: [
+        {
+            object_id
+            version_id
+            digests[]
+        }
+    ]
+    parameters_artifact
+    outputs[]
+    started_at
+    finished_at
+    reproducibility_claim
+}
+
+Then every translation can answer:
+
+Exactly what generated this?
+
+⸻
+
+42. For LLM calls, be honest about reproducibility
+
+For an API model:
+
+model = "whatever-provider/model"
+
+may not uniquely specify immutable model weights.
+
+Therefore capture:
+
+provider
+provider_model_id
+provider_model_version if supplied
+request timestamp
+request body artifact
+prompt digest
+response artifact
+response headers
+sampling configuration
+tool definitions
+system implementation version
+
+But state:
+
+reproducibility = NON_DETERMINISTIC
+
+unless you actually possess enough information to reproduce it.
+
+Never pretend an API model string is a content-addressed model artifact.
+
+⸻
+
+43. Passages need stronger anchors than offsets
+
+My previous:
+
+TextSpan(start,end)
+
+is insufficient.
+
+Text offsets break when the text changes.
+
+The W3C Web Annotation model explicitly notes that position selectors are brittle if the underlying resource changes, and provides complementary quote selectors containing exact text plus prefix/suffix context, as well as resource State information. 
+
+Use multiple selectors.
+
+TextAnchor {
+    source_artifact_id
+    selectors: [
+        TextPositionSelector,
+        TextQuoteSelector,
+        XPathSelector?,
+        XmlIdSelector?,
+        IIIFSelector?
+    ]
+    source_digest
+    normalization_profile?
+}
+
+For plain text:
+
+{
+  "position": {
+    "start": 4811,
+    "end": 4873
+  },
+  "quote": {
+    "exact": "...",
+    "prefix": "...",
+    "suffix": "..."
+  },
+  "source_digest": "sha512:..."
+}
+
+Much more robust.
+
+⸻
+
+44. IIIF should remain an adapter, not an internal ontology
+
+IIIF Presentation 3 is explicitly versioned, supports Canvases/Annotations, and builds on the W3C Web Annotation model. 
+
+For manuscript images:
+
+Pāṭala ImageRegion
+
+can export to:
+
+IIIF Canvas
++
+Web Annotation selector
+
+But don’t couple canonical identity to:
+
+current IIIF v3 JSON structure
+
+Standards evolve too.
+
+⸻
+
+45. This general rule applies to every external standard
+
+Pāṭala core
+    ↓ adapters
+IIIF
+PROV-O
+DataCite
+TEI
+DTS
+CIDOC CRM
+Web Annotation
+RO-Crate
+...
+
+not:
+
+Pāṭala ontology = giant union of external standards
+
+The external formats should constrain us enough to remain interoperable.
+
+They should not control our entire internal evolution.
+
+⸻
+
+46. API version and schema version are different things
+
+Important.
+
+You could have:
+
+API /v1
+
+serving entities that internally use:
+
+Work schema 3
+Assertion schema 6
+Translation schema 2
+
+API version is a consumer contract.
+
+Schema version is a persisted object contract.
+
+Do not couple them.
+
+⸻
+
+47. API v1 longevity
+
+Keep:
+
+/v1/works
+/v1/works/{id}
+/v1/bundle/{id}
+
+stable.
+
+If you add fields:
+
+fine.
+
+If semantics change radically:
+
+/v2
+
+Meanwhile old Pāṭala events may span:
+
+schema v1
+v2
+v3
+v8
+
+without any problem.
+
+⸻
+
+48. External clients must not be canonical writers
+
+Otherwise future compatibility becomes horrific.
+
+External contributor:
+
+POST /proposal
+
+Pāṭala receives:
+
+ContributionProposal
+
+Then internal ingestion converts that into a current canonical schema.
+
+That prevents external clients from directly injecting arbitrary permanent domain objects.
+
+⸻
+
+49. OpenAlex has another lesson worth copying exactly
+
+OpenAlex tells clients to resolve ambiguous names to IDs rather than filtering on ambiguous names directly. 
+
+OpenPāṭala should be stricter still.
+
+Never:
+
+GET /work/Abhinavagupta
+
+silently decides an entity.
+
+Resolve:
+
+GET /resolve?q=...
+
+returns candidates.
+
+Then ID-based operations.
+
+The substring fallback in your current API should disappear.
+
+⸻
+
+50. Current-state hashes
+
+Do not hash an entire entity’s mutable current representation and call that its identity.
+
+But it is useful to expose:
+
+state_digest
+
+Example:
+
+{
+  "id": "PTW_...",
+  "state_version": 41873,
+  "state_digest": {
+    "algorithm": "sha512",
+    "canonicalization": "jcs",
+    "value": "..."
+  }
+}
+
+Agent can cache:
+
+I last saw digest X.
+
+Later:
+
+digest Y
+
+means something changed.
+
+⸻
+
+51. state_version
+
+Use a monotonically advancing projection cursor, not just updated_at.
+
+Dates can collide.
+
+Distributed clocks can differ.
+
+A cursor says:
+
+Pāṭala state through event cursor 9217731
+
+Snapshot:
+
+state_cursor=9217731
+
+API:
+
+GET /changes?since=9217731
+
+That’s deterministic.
+
+⸻
+
+52. Three different time fields
+
+You will eventually need them.
+
+occurred_at
+observed_at
+recorded_at
+
+Example:
+
+Scholar published claim:
+1912
+Pāṭala downloaded PDF:
+2027-03-01
+Pāṭala extractor committed assertion:
+2027-03-02
+
+Those are three different times.
+
+Don’t collapse them into:
+
+timestamp
+
+⸻
+
+53. Assertions may also have validity intervals
+
+Particularly later for institutions/person roles/current scholarly positions.
+
+valid_from?
+valid_until?
+
+Separate:
+
+when Pāṭala learned this
+
+from:
+
+when this was supposedly true.
+
+That’s effectively bitemporal thinking.
+
+⸻
+
+54. Typed relations also need versions
+
+Suppose:
+
+TRANSLATES
+
+is initially vague.
+
+Later you distinguish:
+
+TRANSLATES_COMPLETE
+TRANSLATES_PARTIAL
+TRANSLATES_ADAPTIVELY
+
+Don’t silently redefine TRANSLATES.
+
+Have a versioned relation vocabulary.
+
+RelationDefinition {
+    uri
+    version
+    domain[]
+    range[]
+    semantics
+    inverse?
+    transitive?
+    staleness_policy
+    authority_policy
+    deprecated?
+}
+
+The meaning of edges must be versionable too.
+
+⸻
+
+55. Relation vocabulary should be first-class
+
+Directory:
+
+protocol/
+  relations/
+    authored-by/
+    edition-of/
+    witness-of/
+    transcription-of/
+    translation-of/
+    derived-from/
+    supports/
+    contradicts/
+
+Each with:
+
+definition
+allowed subject types
+allowed object types
+staleness propagation
+authority propagation
+schema version
+
+This prevents graph semantics turning into random string soup.
+
+⸻
+
+56. Distinguish identity graph from derivation graph
+
+Also crucial.
+
+Work A SAME_WORK Work B
+
+is identity reasoning.
+
+Translation B DERIVED_FROM EText A
+
+is provenance.
+
+Claim C SUPPORTED_BY Passage P
+
+is epistemic relation.
+
+Lesson L DEPENDS_ON Claim C
+
+is dependency.
+
+Do not put all of these into:
+
+edges(source,target,type)
+
+and pretend that constitutes a model.
+
+They have completely different semantics.
+
+⸻
+
+57. Four graph families
+
+I’d formalize:
+
+IDENTITY GRAPH
+what is the same thing?
+DERIVATION GRAPH
+what was produced from what?
+EPISTEMIC GRAPH
+what supports/attacks/interprets what?
+DEPENDENCY GRAPH
+what must be reconsidered if X changes?
+
+Some edge may appear in multiple projections.
+
+That’s okay.
+
+⸻
+
+58. Never allow domain schemas to carry verified=true
+
+Delete the concept eventually.
+
+Your existing resolver is already better than this: it models separate dimensions such as WORK_IDENTITY, EDITION_IDENTITY, ETEXT_DERIVATION, WITNESS_LINKAGE, DATE_PRECISION, and RIGHTS, and explicitly avoids treating one external search hit as multi-source verification.
+
+Promote that philosophy throughout the system.
+
+⸻
+
+59. Replace generic status with typed claims
+
+Not:
+
+verified = true
+
+but:
+
+identity:
+    MULTI_SOURCE_MATCHED
+etext_derivation:
+    TEXT_DERIVATION_VERIFIED
+rights:
+    COMPUTE_ALLOWED
+translation:
+    MACHINE_EVALUATED
+scholar_review:
+    NONE
+
+Then different products decide their own eligibility.
+
+⸻
+
+60. Rights changes must never silently broaden
+
+Property test:
+
+UNKNOWN
+→ OPEN
+
+requires:
+
+RightsAssessmentEvent
++
+evidence
+
+No transformation worker can simply inherit or broaden rights.
+
+This should be one of your hardest protocol invariants.
+
+⸻
+
+61. Snapshot/archive integrity
+
+Each snapshot build should generate:
+
+manifest.json
+manifest.json.sha512
+signature(s)
+
+OCFL similarly requires inventories to have digest sidecars and specifies computing the inventory digest only after the final inventory is complete. 
+
+That’s a solid archival pattern to steal.
+
+⸻
+
+62. Longer-term: Apache Iceberg is actually interesting here
+
+Not yet as your source of truth.
+
+But once:
+
+observations = hundreds of millions
+events = billions
+model traces = billions
+
+you will want an analytical data lake in R2.
+
+Apache Iceberg is designed for huge object-store tables and supports schema evolution without rewriting all historical data, field identity that survives renames, snapshots/time travel and rollback. 
+
+That maps beautifully to future Pāṭala analytics.
+
+Architecture later:
+
+canonical event store
+       │
+       ▼
+Parquet / Iceberg
+on R2
+       │
+ ┌─────┼─────┐
+Spark Trino DuckDB etc.
+
+Do not add Iceberg to today’s critical path.
+
+But architect so this projection is trivial later.
+
+⸻
+
+63. Iceberg has one particularly good rule worth stealing NOW
+
+Iceberg assigns schema fields stable numeric IDs and never reuses them, which is how renames can remain unambiguous. 
+
+We can adopt the same idea inside Pāṭala schemas.
+
+Example:
+
+{
+  "field_id": 17,
+  "name": "preferred_title"
+}
+
+Rename:
+
+preferred_title
+→ display_title
+
+but:
+
+field_id = 17
+
+remains.
+
+Especially useful for long-lived export schemas.
+
+⸻
+
+64. Revised permanent envelope
+
+I would now freeze approximately this:
+
+RecordEnvelope {
+    id
+    object_type
+    schema_uri
+    created_at
+    created_by
+    payload
+    payload_digest: {
+        algorithm
+        canonicalization
+        value
+    }
+    extensions {}
+}
+
+But for permanent changes:
+
+EventEnvelope {
+    event_id
+    event_type
+    schema_uri
+    entity_ids[]
+    actor_id
+    occurred_at?
+    observed_at?
+    recorded_at
+    payload
+    payload_digest
+    derivation_refs[]
+}
+
+Everything else can evolve.
+
+⸻
+
+65. Revised Artifact
+
+Artifact {
+    id
+    media_type
+    byte_length
+    digests: [
+        Digest
+    ]
+    locations: [
+        ArtifactLocation
+    ]
+    rights_assessment_ids[]
+    availability_state
+    created_at
+}
+
+Not:
+
+Artifact ID = SHA
+
+⸻
+
+66. Revised RawObservation
+
+RawObservation {
+    id
+    provider_id
+    endpoint_id
+    source_resource_id?
+    requested_uri
+    resolved_uri?
+    acquisition_method
+    observed_at
+    response_metadata_artifact?
+    payload_artifact_id
+    rights_assessment_id
+    run_id
+    source_state {
+        etag?
+        last_modified?
+    }
+}
+
+This object shouldn’t care what a Work schema looks like.
+
+That is why it survives everything.
+
+⸻
+
+67. Revised assertion
+
+Assertion {
+    id
+    subject_id
+    predicate_uri
+    object_id?
+    literal?
+    epistemic_mode
+    evidence_use_ids[]
+    attributed_to
+    asserted_at?
+    recorded_at
+    lifecycle:
+        PROPOSED
+        ACTIVE
+        CONTESTED
+        RETRACTED
+        SUPERSEDED
+    created_from_event
+}
+
+And events change lifecycle.
+
+⸻
+
+68. EvidenceUse
+
+EvidenceUse {
+    id
+    assertion_id
+    evidence_entity_id
+    role
+    anchor_id?
+    interpretation_note?
+    created_at
+}
+
+This is much stronger than putting:
+
+evidence_refs[]
+
+everywhere with undefined meaning.
+
+⸻
+
+69. Exact provenance for extraction
+
+ExtractionActivity {
+    id
+    input_observation
+    extractor {
+        software_id
+        version
+        code_digest
+    }
+    configuration_artifact
+    model_run_id?
+    outputs[]
+    started_at
+    completed_at
+}
+
+If an LLM extracts:
+
+author = Abhinavagupta
+
+you can reconstruct exactly:
+
+what input
+what prompt
+what model
+what parser
+what code
+
+produced it.
+
+⸻
+
+70. Hash the code/config too
+
+Factory or ingestion run:
+
+code commit
+container image digest if available
+configuration hash
+prompt artifact hash
+schema version
+
+This is directly analogous to supply-chain provenance models that capture builder definition, materials and subject digest. 
+
+It will be extraordinarily useful once evolving agents begin rewriting your own tools.
+
+⸻
+
+71. This matters even more with DGM/A-Evolve
+
+Imagine:
+
+Resolver Agent v18
+
+made a merge.
+
+Three months later:
+
+Resolver Agent v27
+
+is much better.
+
+You need to know which decisions were produced under v18.
+
+Then:
+
+SystemIssue:
+Resolver v18 has false merge pattern XYZ
+
+can query:
+
+every resolution produced by variant v18
+
+and schedule reconsideration.
+
+This is exactly where provenance becomes operational rather than archival decoration.
+
+⸻
+
+72. A generated output should point to agent variant
+
+ActivityImplementation {
+    capability_id
+    agent_variant_id
+    software_commit
+    model_route_policy
+    prompt_bundle
+    tool_bundle
+}
+
+Then evolutionary improvements can trigger:
+
+affected historical outputs
+
+for possible re-evaluation.
+
+That is futuristic and useful.
+
+⸻
+
+73. Do not automatically regenerate everything
+
+Suppose agent improves 3%.
+
+Don’t invalidate 10 million outputs.
+
+Use:
+
+known_failure_classes
+
+plus dependency graph.
+
+Example:
+
+AgentVariant 12
+failed frequently on bahuvrīhi compounds.
+
+Re-evaluate only outputs containing:
+
+bahuvrīhi risk
+
+That’s eventually massive savings.
+
+⸻
+
+74. Schema evolution becomes another dependency
+
+Schema V1
+     ↓
+historical records
+
+When V2 appears:
+
+not all V1 records become stale.
+
+Instead migration declares:
+
+semantic equivalence
+lossy
+lossless
+requires re-extraction
+
+This gives you targeted migration.
+
+⸻
+
+75. Correcting our Work model
+
+I still agree with:
+
+Work {
+    id
+    preferred_title
+}
+
+as a projection.
+
+But even:
+
+preferred_title
+
+is arguably not canonical truth.
+
+The absolute hard core could simply be:
+
+Work identity exists
+
+and:
+
+preferred_title
+
+is a selected projection from TitleAssertions.
+
+So:
+
+WorkProjection {
+   id
+   preferred_title
+}
+
+rather than pretending title is intrinsic permanent identity.
+
+⸻
+
+76. Think “materialized scholarly view”
+
+For any Work:
+
+CURRENT VIEW
+preferred title
+current authorship state
+current dating
+traditions
+best e-text
+translations
+
+is calculated from:
+
+assertions
+evidence
+resolution policy
+review events
+
+That is much stronger than a conventional catalog row.
+
+⸻
+
+77. Current-view policy needs a version too
+
+Because:
+
+which assertion wins?
+
+may change.
+
+ProjectionPolicy {
+    id
+    version
+    policy_type:
+        CANONICAL_WORK_VIEW
+        BEST_ETEXT
+        TRANSLATION_AVAILABILITY
+        COMPLETENESS
+    implementation_digest
+}
+
+Then:
+
+Work view generated under
+CanonicalWorkPolicy v7
+
+is reproducible.
+
+⸻
+
+78. This is how you survive new scholarship
+
+2033 scholar proves:
+
+Work A probably authored by B, not C.
+
+You append evidence/assertions/review.
+
+Projection policy computes:
+
+preferred authorship = B
+
+Nothing historical disappears.
+
+Every downstream object referencing the old authorship can be:
+
+RECHECK
+
+through dependency edges.
+
+⸻
+
+79. The negative graph also benefits
+
+SearchEvent {
+    id
+    search_protocol_version
+    query
+    target
+    providers[]
+    started_at
+    completed_at
+    result_ids[]
+    outcome
+    coverage_statement
+    run_provenance
+}
+
+If new provider added in 2029:
+
+translation SearchEvent 2027
+
+is not deleted.
+
+Its coverage merely becomes outdated.
+
+You can schedule:
+
+RESEARCH
+
+because the search space changed.
+
+⸻
+
+80. Do not call search failures permanent facts
+
+This:
+
+NO TRANSLATION EXISTS
+
+should never be canonical.
+
+Use:
+
+NO_TRANSLATION_FOUND
+under SearchProtocol v4
+on 2027-06-01
+across provider set S
+
+Then current projection can say:
+
+NONE_KNOWN
+
+That’s epistemically defensible.
+
+⸻
+
+81. What OpenPāṭala should copy from OpenAlex
+
+Copy almost directly:
+
+opaque/stable entity IDs
+external-ID crosswalks
+ID-first API
+redirect merged IDs
+entity endpoints
+cursor pagination
+select/filter/group
+snapshots
+incremental change distribution
+simple bulk formats
+
+OpenAlex’s current documentation demonstrates all of these patterns, including merge redirects and snapshot/change workflows. 
+
+⸻
+
+82. What OpenPāṭala should NOT copy from OpenAlex
+
+Do not stop at:
+
+current entity object
+
+because our domain needs:
+
+source assertions
+conflicting identities
+textual transmission
+rights
+historical adjudication
+extraction provenance
+negative searches
+scholar review
+
+OpenPāṭala should essentially be:
+
+OpenAlex-like ergonomics over a much deeper event/provenance system.
+
+That is an excellent architectural target.
+
+⸻
+
+83. Recommended final layers
+
+This is what I would freeze now.
+
+LAYER 0 — ARTIFACTS
+exact observed bytes
+LAYER 1 — OBSERVATIONS
+who/where/when those bytes came from
+LAYER 2 — EXTRACTIONS
+what parsers/models extracted
+LAYER 3 — ASSERTIONS
+what sources/actors claim
+LAYER 4 — IDENTITY
+what entities those claims refer to
+LAYER 5 — ADJUDICATION
+what has been reviewed/accepted/rejected
+LAYER 6 — CURRENT STATE
+current materialized scholarly view
+LAYER 7 — PRODUCTS
+API/search/Factory/Learn/etc.
+
+Only L0–L5 deserve archival-grade preservation.
+
+L6 can be rebuilt.
+
+L7 can disappear entirely.
+
+⸻
+
+84. The schema families I would actually freeze
+
+Not every possible object.
+
+Freeze the primitives:
+
+core/entity-identity
+core/event
+core/schema-definition
+core/artifact
+core/digest
+core/actor
+source/provider
+source/endpoint
+source/observation
+source/rights-assessment
+provenance/activity
+provenance/derivation
+epistemic/assertion
+epistemic/evidence-use
+identity/external-identifier
+identity/identity-assertion
+identity/merge
+identity/split
+review/review-event
+review/adjudication
+anchor/text-anchor
+
+Then build:
+
+Work
+Edition
+Translation
+Witness
+...
+
+on top.
+
+If one of those higher schemas is wrong, no catastrophe.
+
+⸻
+
+85. Repository layout I’d change to
+
+protocol/
+│
+├── registry/
+│   └── schemas.json
+│
+├── schemas/
+│   ├── core/
+│   ├── source/
+│   ├── identity/
+│   ├── epistemic/
+│   ├── provenance/
+│   ├── review/
+│   └── atlas/
+│
+├── relations/
+│
+├── migrations/
+│   ├── work-v1-to-v2/
+│   └── ...
+│
+├── compatibility/
+│
+├── fixtures/
+│   ├── historical/
+│   ├── valid/
+│   └── invalid/
+│
+└── conformance/
+
+And:
+
+ledger/
+├── canonicalize.py
+├── digest.py
+├── events.py
+├── merkle.py
+├── checkpoint.py
+├── signatures.py
+└── verify.py
+
+⸻
+
+86. Schema registry manifest
+
+{
+  "schema": "patala.schema-registry/1",
+  "schemas": [
+    {
+      "family": "epistemic/assertion",
+      "version": "1.2.0",
+      "uri": "...",
+      "digest": {
+        "algorithm": "sha512",
+        "value": "..."
+      },
+      "compatibility": "BACKWARD",
+      "supersedes": "1.1.0"
+    }
+  ]
+}
+
+Hash the registry itself.
+
+Include its root in every release checkpoint.
+
+⸻
+
+87. Ledger checkpoint
+
+{
+  "checkpoint_id": "...",
+  "previous_checkpoint": "...",
+  "event_cursor_start": 800000,
+  "event_cursor_end": 810000,
+  "event_count": 10001,
+  "merkle": {
+    "hash_algorithm": "sha512",
+    "canonicalization": "jcs",
+    "root": "..."
+  },
+  "schema_registry_digest": "...",
+  "created_at": "...",
+  "signatures": [
+    {
+      "algorithm": "...",
+      "key_id": "...",
+      "value": "..."
+    }
+  ]
+}
+
+⸻
+
+88. Snapshot manifest
+
+{
+  "snapshot_id": "PTSNAP_...",
+  "state_cursor": 810000,
+  "previous_snapshot": "PTSNAP_...",
+  "protocol_version": "1.4.0",
+  "schema_registry_digest": "...",
+  "ledger_checkpoint": "...",
+  "files": [
+    {
+      "path": "works.parquet",
+      "rows": 127391,
+      "digests": {
+        "sha512": "..."
+      }
+    }
+  ],
+  "root_digest": "...",
+  "signatures": []
+}
+
+⸻
+
+89. Critical conformance tests
+
+This is more important than more docs.
+
+Historical readability
+
+Every object ever produced can still be interpreted.
+
+ALL old fixtures → PASS
+
+⸻
+
+Schema immutability
+
+CI fails if a published schema’s bytes change.
+
+schema digest changed
+without version bump
+→ FAIL
+
+⸻
+
+Migration determinism
+
+fixture V1
+→ migration
+→ expected V2
+100 runs identical
+
+⸻
+
+Replay
+
+Start with empty projections.
+
+Replay canonical event history.
+
+Final current-state digest must match production snapshot.
+
+⸻
+
+Fixity
+
+Mutate one byte in a test Artifact.
+
+Integrity validator must fail.
+
+⸻
+
+JCS cross-language
+
+Python, Rust and TypeScript canonicalize the same fixtures and obtain the same digest.
+
+⸻
+
+Crypto agility
+
+Add SHA-512 to an Artifact historically stored with SHA-256.
+
+Artifact identity must remain unchanged.
+
+⸻
+
+Entity merge
+
+Old ID continues resolving.
+
+⸻
+
+Entity split
+
+Old ID never silently resolves to only one child.
+
+⸻
+
+Rights
+
+No transformation can broaden rights without explicit evidence/event.
+
+⸻
+
+Unknown schema field
+
+Forward-compatible consumers fail safely or preserve the extension rather than corrupting state.
+
+⸻
+
+Projection destruction
+
+Delete every projection table.
+
+Rebuild everything.
+
+API results semantically identical.
+
+That last test is the ultimate proof of future-proofing.
+
+⸻
+
+90. Migration test for the mistake we already made
+
+Your current code represents translations as edition rows in one persistence path.
+
+Excellent real-world test.
+
+Don’t hide it.
+
+Use it as your first schema-evolution exercise.
+
+Historical:
+
+EditionV1 {
+    edition_type = "translation"
+}
+
+Migration creates:
+
+Translation
++
+TranslationOf relation
++
+Publication/Edition relation as appropriate
+
+with:
+
+migration_source = old EditionV1
+
+Then rebuild new projection.
+
+If that works without destroying the legacy object, your architecture is proving itself.
+
+⸻
+
+91. Same for Work metadata
+
+Current code can infer title/author/year from identifiers during normalization.
+
+Rather than silently changing old rows, replay those source observations through:
+
+SlugExtractor V2
+
+and produce new assertions.
+
+Another excellent migration proof.
+
+⸻
+
+92. The important conceptual inversion
+
+Do not ask:
+
+What schema will model Sanskrit perfectly forever?
+
+Impossible.
+
+Ask:
+
+What minimal preserved information lets future Pāṭala reinterpret the Sanskrit corpus under a much better schema?
+
+Answer:
+
+original bytes
+original external IDs
+retrieval context
+stable internal identities
+historical assertions
+derivation events
+human decisions
+schema used at the time
+
+That’s the future-proof core.
+
+⸻
+
+93. Then ontology can evolve aggressively
+
+You may discover in five years that:
+
+Work
+
+was too coarse.
+
+Perhaps you need:
+
+TextualWork
+Recension
+Redaction
+CompositionLayer
+WitnessExpression
+
+Fine.
+
+Historical observation:
+
+Muktabodha record X
+
+still exists.
+
+You can reinterpret it.
+
+That’s why raw acquisition is so valuable.
+
+⸻
+
+94. Greek becomes easy under this model
+
+Greek doesn’t require modifying the permanent ingestion kernel.
+
+It adds new:
+
+Provider adapters
+Scripts
+Citation schemes
+Entity projections
+Relation vocabularies
+Text normalization profiles
+
+The durable primitives remain:
+
+Artifact
+Observation
+Assertion
+Identity
+Evidence
+Event
+
+That’s exactly the proof that the architecture is genuinely domain-general.
+
+⸻
+
+95. And science later works for the same reason
+
+Instead of:
+
+manuscript scan
+
+Artifact may be:
+
+instrument output
+
+Observation:
+
+experiment produced measurement X
+
+Assertion:
+
+measurement supports H
+
+The same provenance/event architecture survives.
+
+That’s the deepest reason to make the bottom layer extremely boring.
+
+⸻
+
+96. What I would NOT build
+
+Despite all this:
+
+do not build a blockchain.
+
+Do not build:
+
+custom RDF database
+custom cryptographic algorithm
+custom serialization format
+custom object-store standard
+custom identifier cryptography
+
+Use boring established pieces.
+
+Pāṭala should innovate on:
+
+scholarly identity resolution
+epistemic state
+active research
+human/reality routing
+
+not hashes.
+
+⸻
+
+97. Hard architectural constitution
+
+I would now freeze these twelve invariants:
+
+1. Entity identity is opaque and independent of content.
+2. Original observations are never silently rewritten.
+3. Every permanently stored structured record identifies the exact schema under which it was written.
+4. Published schemas are immutable.
+5. Breaking semantic changes create new schemas/relations rather than redefining old ones.
+6. Current database tables are rebuildable projections, not history.
+7. Every derivation can resolve to exact input versions/artifacts and implementation provenance.
+8. Hash algorithms and signature algorithms are explicitly tagged and replaceable.
+9. Fixity does not imply truth; signature does not imply authority.
+10. Merged/split/retired IDs remain permanently resolvable.
+11. Rights cannot be inferred or silently broadened by transformations.
+12. Given artifacts + events + schemas, the current read plane can be deterministically reconstructed.
+
+If those hold, almost everything else can be wrong today and still be recoverable.
+
+⸻
+
+98. The revised architecture
+
+                         INTERNET / INSTITUTIONS
+                                  │
+                                  ▼
+                         RAW ACQUISITION
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+             RawObservation                Artifact
+                    │                       exact bytes
+                    │                           │
+                    └─────────────┬─────────────┘
+                                  ▼
+                           ExtractionActivity
+                                  │
+                                  ▼
+                         CandidateAssertions
+                                  │
+                                  ▼
+                           Identity Resolver
+                                  │
+                                  ▼
+                       Assertions / Relations
+                                  │
+                           Review / Events
+                                  │
+                                  ▼
+══════════════════════════ DURABLE LINE ══════════════════════════
+                                  │
+                       Projection / Compiler
+                                  │
+           ┌──────────────────────┼──────────────────────┐
+           ▼                      ▼                      ▼
+        Postgres              Parquet/Iceberg          API
+        current                 snapshots              views
+        state
+           │
+           ▼
+     OpenPāṭala API
+           │
+     ┌─────┼────────────┬────────────┐
+     ▼     ▼            ▼            ▼
+ Factory  Eval        Research      Learn
+
+That’s substantially stronger than the previous version.
+
+⸻
+
+99. What I would tell the build agent now
+
+Do not rewrite OpenPāṭala again.
+
+Make one architectural hardening branch.
+
+Sequence:
+
+H0 rotate/remove exposed legacy credentials
+H1 add UUIDv7 opaque identity layer
+H2 add algorithm-tagged DigestSet
+H3 implement RFC8785 canonical structured hashing
+H4 create immutable schema registry
+H5 create canonical EventEnvelope
+H6 move raw acquisitions to Artifact + RawObservation
+H7 create deterministic replay/projection framework
+H8 add EntityMerge / EntitySplit / Tombstone
+H9 implement migration/upcaster registry
+H10 turn current Work/Edition/etc tables into documented projections
+H11 migrate existing Archive.org ingestion through new observation path
+H12 migrate existing translation-as-edition mistake as first real migration test
+H13 build Merkle checkpoint service
+H14 sign release checkpoints
+H15 build immutable snapshot manifests + /changes
+H16 add PROV-O / Web Annotation / DataCite adapters
+H17 add destroy-and-rebuild projection conformance test
+H18 only then resume massive ingestion
+
+I would not ingest the 3,000 Muktabodha works into the old structure before H1–H12.
+
+You don’t need the entire futuristic Research OS finished.
+
+But you want the archival spine correct before you pour millions of observations through it.
+
+⸻
+
+100. The standard I would use for “ready to ingest everything”
+
+The system passes this experiment:
+
+1. Ingest one Muktabodha work under schema V1.
+2. Publish translation/entity state.
+3. Introduce schema V2:
+   radically change authorship representation.
+4. Replay old V1 history into V2 projection.
+5. Change one source assertion.
+6. Merge two duplicate Work identities.
+7. Split one incorrectly conflated identity.
+8. Rehash artifacts using an additional algorithm.
+9. Destroy Postgres projections completely.
+10. Rebuild from immutable artifacts + events + schemas.
+11. Compare resulting state digest.
+12. Resolve every historical ID and every historical evidence anchor.
+
+If that passes:
+
+then unleash autonomous ingestion.
+
+At that point it basically does not matter if you later decide the ontology needs another redesign.
+
+You have kept the things that can’t be recovered.
+
+⸻
+
+The biggest conceptual shift from my last design is therefore:
+
+OpenPāṭala should not try to create a perfect permanent model of Sanskrit. It should create a perfect permanent memory of what Pāṭala observed, what it inferred from those observations, which identity each inference referred to, who changed their mind and why, and which schema/software produced each interpretation.
+
+OpenAlex shows how powerful stable IDs, redirects, bulk snapshots and agent-friendly entity APIs can become at large scale.  OCFL shows how archival content can survive versioning and digest migration.  PROV gives us interoperable derivation semantics.  Web Annotation gives us robust source anchoring.  RFC 8785 gives us deterministic structured hashing.  Sigstore demonstrates the Merkle-checkpoint/transparency pattern.  Iceberg gives a model for massive future analytical projections with schema evolution and time travel. 
+
+The resulting architecture is much harder than “OpenAlex for Sanskrit.” It is essentially an append-only scholarly memory system with disposable interpretations.
+
+And that is exactly the substrate the unlimited-agent future needs: agents and schemas can change constantly, while identity, evidence, reality and history remain addressable forever. - I’m confused why something like openpatala doesn’t exist already should I be afraid of that huge India funded project or anything else? How can I integrate all existing tools 

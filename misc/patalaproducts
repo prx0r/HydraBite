@@ -1,0 +1,956 @@
+Yes. I’d make the canonical Pāṭala product surface **much smaller and more productized** than the internal architecture. Internally you can have dozens of object types; externally, users should see a handful of focused scholarly products, each with a clear artifact, proof object, checkpoint, and use case.
+
+The clean canonical list is:
+
+1. **Translation**
+2. **Translation Proof**
+3. **Passage / Reading**
+4. **Claim**
+5. **Argument**
+6. **Crux**
+7. **Review**
+8. **Scholar Attestation**
+9. **Research Packet**
+10. **Synthesis**
+11. **Essay / Explainer**
+12. **Education / Understanding Check**
+13. **Comparison**
+14. **Audit**
+15. **Dataset / Benchmark**
+16. **Agent Context Bundle**
+
+Those are the user-facing modules. Everything else should mostly support them.
+
+## 1. Translation
+
+The simplest product.
+
+```text
+SOURCE PASSAGE
+     ↓
+TRANSLATION
+```
+
+Expose:
+
+```text
+Sanskrit
+word segmentation
+literal translation
+readable translation
+notes
+uncertainties
+alternate readings
+```
+
+Canonical artifact:
+
+```text
+TranslationRevision
+```
+
+Checkpoint ladder:
+
+```text
+T0  machine draft
+T1  source-complete
+T2  morphology/syntax checked
+T3  terminology checked
+T4  independent review
+T5  scholar approved
+```
+
+Product page:
+
+```text
+patala.org/translation/IPVV-1.5.11
+```
+
+This is the thing normal readers actually consume.
+
+---
+
+# 2. Translation Proof
+
+This should probably be one of the flagship products.
+
+Not:
+
+> “AI says this translation is good.”
+
+But:
+
+```text
+TRANSLATION
+    ↓
+structured audit dimensions
+    ↓
+TRANSLATION PROOF
+```
+
+Your current dimensions are already close:
+
+```text
+SOURCE_COVERAGE
+TARGET_GROUNDING
+MORPHOLOGY
+SYNTAX
+NEGATION
+MODALITY
+TERM_CONSISTENCY
+SEMANTIC_ENTAILMENT
+PARALLEL_WITNESS
+HUMAN_REVIEW
+```
+
+Expose the proof as a **non-aggregate vector**.
+
+Example:
+
+```text
+Translation Proof TP-0093
+
+Coverage             PASS
+Morphology           PASS
+Syntax               PASS
+Negation             PASS
+Modality             WARN
+Terminology          PASS
+Entailment            PASS
+Parallel witness     2 found
+Independent review   PASS
+Scholar review       pending
+```
+
+This is much stronger than a “94% translation quality score.”
+
+Checkpoint:
+
+```text
+TP0 generated
+TP1 deterministic checks
+TP2 adversarial audit
+TP3 independent review
+TP4 scholar adjudicated
+```
+
+---
+
+# 3. Passage / Reading
+
+This is the philology-facing primitive.
+
+For every canonical passage:
+
+```text
+SOURCE
+├── witnesses
+├── editions
+├── variants
+├── segmentation
+├── morphology
+├── readings
+└── translation revisions
+```
+
+Product:
+
+> **Passage Workbench**
+
+This is where a Sanskritist can say:
+
+```text
+I disagree with this sandhi resolution.
+I prefer reading X.
+This edition has Y.
+```
+
+Checkpoint:
+
+```text
+P0 ingested
+P1 normalized
+P2 witness-aligned
+P3 readings encoded
+P4 reviewed
+```
+
+This becomes the foundation underneath Translation Proof.
+
+---
+
+# 4. Claim
+
+This is the first serious scholarly abstraction.
+
+```text
+PASSAGES
+   ↓
+CLAIM
+```
+
+Example:
+
+```text
+CLAIM C-143
+
+Abhinavagupta treats recognition as
+re-identification rather than acquisition
+of genuinely new knowledge.
+```
+
+Expose:
+
+```text
+claim
+scope
+modality
+source passages
+supporting evidence
+counterevidence
+interpretive status
+authority
+```
+
+Crucially:
+
+```text
+SOURCE-SAYS
+SCHOLAR-RECONSTRUCTS
+PĀṬALA-INFERS
+```
+
+must remain visibly distinct.
+
+Checkpoint:
+
+```text
+C0 proposed
+C1 evidence attached
+C2 scope/modality audit
+C3 contradiction search
+C4 independent review
+C5 adjudicated
+```
+
+---
+
+# 5. Argument
+
+One of the major Pāṭala products.
+
+Not merely argument visualization.
+
+A real **Argument Proof**.
+
+```text
+premises
+inference
+conclusion
+evidence
+defeaters
+validity
+soundness status
+```
+
+Example:
+
+```text
+ARG-0182
+
+P1 ...
+P2 ...
+P3 ...
+
+Therefore C
+```
+
+Expose two independent judgements:
+
+```text
+VALIDITY
+Does C follow from P1–P3?
+
+SOUNDNESS
+Are P1–P3 warranted?
+```
+
+This matches the reasoning discipline Pāṭala needs.
+
+Checkpoint:
+
+```text
+A0 reconstructed
+A1 premises grounded
+A2 inference classified
+A3 validity checked
+A4 defeaters generated
+A5 rival reconstruction tested
+A6 reviewed
+```
+
+This can become:
+
+> **Pāṭala Argument**
+
+a standalone product scholars can cite.
+
+---
+
+# 6. Crux
+
+I would absolutely expose this as its own product.
+
+A crux is:
+
+> the smallest unresolved proposition whose resolution would materially change the debate.
+
+```text
+CRUX-23
+
+Question:
+Does Utpaladeva require enduring subject identity?
+
+Position A
+Position B
+
+decisive evidence required
+current best evidence
+downstream consequences
+```
+
+This is vastly more useful than another 8,000-word literature review.
+
+Checkpoint:
+
+```text
+CR0 candidate
+CR1 downstream sensitivity confirmed
+CR2 rivals represented
+CR3 decisive-evidence conditions defined
+CR4 reviewed
+```
+
+Product:
+
+> **Open Crux**
+
+This could become a major scholar-acquisition mechanism.
+
+---
+
+# 7. Review
+
+A Review should itself be a publishable object.
+
+```text
+Review {
+  target
+  reviewer
+  findings
+  severity
+  evidence
+  proposed corrections
+  disposition
+}
+```
+
+Types:
+
+```text
+translation review
+argument review
+citation review
+source review
+essay review
+benchmark review
+```
+
+Statuses:
+
+```text
+OPEN
+SUPPORTED
+REJECTED
+RESOLVED
+SUPERSEDED
+```
+
+This creates a visible scholarly correction history.
+
+---
+
+# 8. Scholar Attestation
+
+This is probably the highest-moat product after Translation Proof.
+
+A scholar should not need to “approve all of Pāṭala.”
+
+They attest to something precise:
+
+```text
+Scholar Attestation
+
+Scholar: X
+Target: TranslationRevision T17
+Statement:
+  "I have reviewed the Sanskrit-to-English
+   translation for semantic fidelity."
+
+Scope:
+  verses 1.5.1–1.5.15
+
+Verdict:
+  ACCEPT WITH QUALIFICATIONS
+```
+
+Attestation types:
+
+```text
+source authenticity
+textual reading
+translation fidelity
+historical claim
+argument reconstruction
+bibliographic completeness
+```
+
+Checkpoint:
+
+```text
+SA0 invitation
+SA1 review submitted
+SA2 identity verified
+SA3 attestation signed
+SA4 public/citable
+```
+
+This is what eventually creates the **expert verification network**.
+
+---
+
+# 9. Research Packet
+
+Extremely practical product.
+
+Instead of telling an agent or scholar to search twenty systems, compile:
+
+```text
+ResearchPacket {
+  question
+  key claims
+  primary sources
+  strongest secondary literature
+  quotations/passages
+  disagreement map
+  cruxes
+  missing evidence
+  bibliography
+}
+```
+
+Example:
+
+> **Research Packet: Does Pratyabhijñā require a permanent self?**
+
+This is useful for:
+
+```text
+scholars
+students
+writers
+agents
+YouTube research
+papers
+```
+
+Checkpoint:
+
+```text
+RP0 search
+RP1 source gathering
+RP2 evidence extraction
+RP3 contradiction/rival search
+RP4 bibliography audit
+RP5 reviewed
+```
+
+This could be one of the first monetizable scholar products.
+
+---
+
+# 10. Synthesis
+
+This is not just “AI summary.”
+
+It is:
+
+```text
+multiple reviewed claims
++
+arguments
++
+cruxes
++
+source constraints
+→
+SYNTHESIS
+```
+
+Expose:
+
+```text
+what is established
+what is probable
+what is disputed
+what remains unknown
+```
+
+Very strict epistemic language.
+
+Example:
+
+> **State of the Question: Recognition in Utpaladeva and Abhinavagupta**
+
+Checkpoint:
+
+```text
+S0 candidate
+S1 claims grounded
+S2 contradictions reconciled/retained
+S3 cruxes surfaced
+S4 certainty calibrated
+S5 reviewed
+```
+
+---
+
+# 11. Essay / Explainer
+
+This should simply be a **projection of the graph**, not a separate epistemic universe.
+
+```text
+SYNTHESIS
+   ↓
+ESSAY
+```
+
+Every sentence can retain:
+
+```text
+SentenceEvidence
+```
+
+and therefore users can click:
+
+> Why does Pāṭala say this?
+
+Product formats:
+
+```text
+scholarly essay
+popular explainer
+video script
+lecture
+timeline
+FAQ
+```
+
+Same underlying proof graph.
+
+Checkpoint:
+
+```text
+E0 generated
+E1 sentence evidence
+E2 citation audit
+E3 strength-drift audit
+E4 editorial review
+```
+
+---
+
+# 12. Education / Understanding Check
+
+This is one of the most distinctive products.
+
+Compile arguments into questions where answering correctly demonstrates the relevant conceptual distinction.
+
+Example:
+
+```text
+Question:
+Which proposition would Utpaladeva
+have to reject for argument ARG-32
+to fail?
+
+A ...
+B ...
+C ...
+D ...
+```
+
+Each distractor maps to a specific error:
+
+```text
+scope confusion
+modal confusion
+premise/conclusion reversal
+rival-position confusion
+```
+
+Product outputs:
+
+```text
+MCQ
+argument completion
+premise ranking
+contradiction spotting
+source attribution
+counterfactual questions
+```
+
+Checkpoint:
+
+```text
+ED0 generated
+ED1 answer proof
+ED2 distractor proof
+ED3 ambiguity test
+ED4 learner calibration
+ED5 reviewed
+```
+
+That's far better than generic quizzes.
+
+---
+
+# 13. Comparison
+
+A really strong focused module.
+
+```text
+Compare:
+translation A vs B
+scholar A vs B
+text A vs B
+argument A vs B
+tradition A vs B
+```
+
+But the output is structured:
+
+```text
+AGREEMENT
+DISAGREEMENT
+APPARENT DISAGREEMENT
+TERMINOLOGICAL DIFFERENCE
+SCOPE DIFFERENCE
+REAL CRUX
+```
+
+Example:
+
+> **Torella vs Ratié on recognition**
+
+or:
+
+> **Abhinavagupta vs Dharmakīrti on reflexive awareness**
+
+Checkpoint:
+
+```text
+CMP0 align claims
+CMP1 normalize terminology
+CMP2 scope/modality check
+CMP3 actual contradictions
+CMP4 crux extraction
+CMP5 reviewed
+```
+
+This will be exceptionally useful.
+
+---
+
+# 14. Audit
+
+“Pāṭala Audit” should be a generic product family.
+
+Examples:
+
+```text
+Translation Audit
+Citation Audit
+Argument Audit
+Term Audit
+Bibliography Audit
+Source Audit
+Essay Audit
+AI Output Audit
+```
+
+Input:
+
+```text
+someone else's artifact
+```
+
+Output:
+
+```text
+Findings[]
+severity
+evidence
+proposed correction
+confidence
+```
+
+This may be the easiest standalone API/business product.
+
+---
+
+# 15. Dataset / Benchmark
+
+Pāṭala's reviewed objects naturally generate benchmarks.
+
+Examples:
+
+```text
+Pāṭala Sanskrit Translation Benchmark
+Negation Challenge
+Compound Resolution Benchmark
+Argument Reconstruction Benchmark
+Citation Entailment Benchmark
+Scholar Review Benchmark
+```
+
+Crucially these aren't synthetic trivia.
+
+They derive from actual disagreements/failures encountered during scholarly work.
+
+Checkpoint:
+
+```text
+B0 candidate cases
+B1 decontamination
+B2 gold creation
+B3 independent adjudication
+B4 blind eval
+B5 public release
+```
+
+That gives you both research credibility and infrastructure value.
+
+---
+
+# 16. Agent Context Bundle
+
+This is the machine-facing product.
+
+Humans use:
+
+```text
+Research Packet
+```
+
+Agents use:
+
+```text
+Context Bundle
+```
+
+Example:
+
+```text
+context(ARG-32, budget=8000)
+```
+
+returns:
+
+```text
+object
+premises
+evidence
+defeaters
+cruxes
+reviews
+authority
+dependencies
+```
+
+already ordered and token-budgeted.
+
+Variants:
+
+```text
+micro 2k
+standard 8k
+deep 32k
+```
+
+This is how Pāṭala becomes infrastructure for external agents.
+
+---
+
+# The product hierarchy I would actually put on the website
+
+Don't show 16 equal menu items.
+
+Group them into four product families.
+
+## **Texts**
+
+```text
+Reading
+Translation
+Translation Proof
+Compare Translations
+Term Audit
+```
+
+This is the Sanskrit/philosophy entry point.
+
+---
+
+## **Arguments**
+
+```text
+Claim
+Argument
+Crux
+Comparison
+Synthesis
+```
+
+This is the philosophy/research engine.
+
+---
+
+## **Scholar**
+
+```text
+Research Packet
+Review
+Scholar Attestation
+Audit
+Benchmark
+```
+
+This is the scholarly infrastructure/business layer.
+
+---
+
+## **Learn**
+
+```text
+Essay
+Explainer
+Argument Map
+Understanding Checks
+Course
+```
+
+This is the public/education layer.
+
+And underneath them all:
+
+```text
+API
+MCP
+Context Bundles
+Datasets
+```
+
+---
+
+# The first focused checkpoints I would build
+
+Don't attempt all products simultaneously.
+
+I'd make **six canonical vertical products** first:
+
+```text
+CP1 — PASSAGE
+source + canonical IDs + morphology/readings
+
+CP2 — TRANSLATION PROOF
+translation + multidimensional proof
+
+CP3 — CLAIM
+passage → defensible proposition
+
+CP4 — ARGUMENT
+claims → inference + validity + defeaters
+
+CP5 — SCHOLAR REVIEW
+review + attestation + correction history
+
+CP6 — RESEARCH PACKET
+compile all of the above into a useful deliverable
+```
+
+Then:
+
+```text
+CP7 — SYNTHESIS
+CP8 — ESSAY
+CP9 — EDUCATION
+CP10 — BENCHMARK
+```
+
+That order matters.
+
+Because everything after CP6 becomes a **projection** of the first six rather than a separate AI capability.
+
+---
+
+# The really clean product chain
+
+You can reduce almost the entire vision to this:
+
+```text
+TEXT
+ │
+ ▼
+PASSAGE
+ │
+ ▼
+TRANSLATION
+ │
+ ▼
+TRANSLATION PROOF
+ │
+ ▼
+CLAIM
+ │
+ ▼
+ARGUMENT
+ │
+ ├────► CRUX
+ │
+ ▼
+REVIEW
+ │
+ ▼
+SCHOLAR ATTESTATION
+ │
+ ▼
+RESEARCH PACKET
+ │
+ ▼
+SYNTHESIS
+ │
+ ├────► ESSAY
+ │
+ ├────► EDUCATION
+ │
+ ├────► VIDEO
+ │
+ ├────► API
+ │
+ └────► BENCHMARK
+```
+
+That is probably the canonical Pāṭala product graph.
+
+The moat products, in my view, are **Translation Proof, Argument Proof, Crux, Scholar Attestation, and Research Packet**. Translation/essays/education are what people consume; those five are the infrastructure that makes the outputs difficult to copy convincingly.

@@ -1,0 +1,1092 @@
+The clean endgame is:
+
+```text
+1. PROVE THE TRANSLATION COMPILER
+2. TURN TRANSLATIONS INTO PROPOSITION/ARGUMENT OBJECTS
+3. ATTACH SCHOLAR EVIDENCE + REVIEW
+4. MAKE CORRECTIONS EXECUTABLE
+5. EXPOSE THE SAME TRUST GRAPH AS MULTIPLE SCHOLAR PRODUCTS
+6. LET OUTSIDE AGENTS/INSTITUTIONS DEPEND ON IT
+```
+
+The key is that **the scholar products should not be separate apps with separate truth stores**. They are projections over the same versioned scholarly graph.
+
+## Phase 1 — finish the proof-carrying translation vertical
+
+First close the current stack:
+
+```text
+SOURCE
+→ T1
+→ L0
+→ ARGMAP
+→ L2
+→ L200
+→ C1
+```
+
+For each layer, Agent 2 produces the object and Agent 1 produces the independent proof.
+
+The first finished unit should therefore look like:
+
+```text
+Passage
+├── SOURCE exact witness/span
+├── T1 transliteral gloss
+│   └── T1Proof
+├── L0 structured token record
+│   └── deterministic transform proof
+├── ArgumentMap
+│   └── ArgumentMapProof
+├── L2 readable translation
+│   └── L2FaithfulnessProof
+├── L200 translation audit
+│   └── L200ClassificationProof
+└── C1 passage commentary
+    └── C1LocalityProof
+```
+
+The important output is not merely a translation. It is:
+
+> **a translation whose derivation can be audited backwards to the Sanskrit and whose uncertainty remains explicit.**
+
+That establishes the substrate for everything else.
+
+---
+
+# Phase 2 — make lexical decisions first-class
+
+Once the translation proof is stable, the next major asset is the **lexical/lemma layer**.
+
+You already have pieces of this:
+
+```text
+surface form
+lemma
+morphology witnesses
+literal gloss
+lexical sense
+sense evidence
+translation occurrence
+```
+
+Now turn them into stable objects.
+
+Conceptually:
+
+```text
+Lemma
+  ├── form
+  ├── root/derivation where appropriate
+  ├── morphology evidence
+  └── occurrences
+
+LexicalSense
+  ├── lemma
+  ├── definition
+  ├── domain/tradition
+  ├── temporal/textual scope
+  └── evidence
+
+SenseUse
+  ├── passage
+  ├── exact token/span
+  ├── chosen sense
+  ├── alternatives
+  ├── rationale
+  └── review status
+```
+
+Then every translated technical term can resolve.
+
+For `vimarśa`, for example:
+
+```text
+vimarśa
+├── occurrence IPVV-X
+│   ├── selected sense S4
+│   ├── alternatives S2/S5
+│   ├── Torella evidence
+│   ├── Ratié evidence
+│   └── reviewer judgment
+├── occurrence TĀ-Y
+...
+```
+
+This creates the eventual **Term Audit / Lemma Tracker** product almost automatically.
+
+The product can show:
+
+* every occurrence;
+* morphology;
+* translations used;
+* sense distribution;
+* chronology;
+* author/text variation;
+* reviewer disagreements;
+* sense changes after correction.
+
+This is one of the strongest scholar-facing assets because it becomes a machine-readable historical lexicon derived from actual textual decisions.
+
+---
+
+# Phase 3 — compile C1/ARGMAP into canonical propositions
+
+The next layer is where Pāṭala stops being merely a translation system.
+
+Take:
+
+```text
+SOURCE + T1 + L2 + C1 + ARGMAP
+```
+
+and emit independently addressable:
+
+```text
+Proposition
+Commitment
+ResearchQuestion
+Position
+Inference
+Attack
+Qualifier
+Crux
+```
+
+Crucially, propositions should not just be extracted strings.
+
+Each needs:
+
+```text
+Proposition
+├── canonical ID/version
+├── proposition content
+├── speaker/attribution
+├── modality
+├── scope
+├── epistemic regime
+├── debate frame
+├── source grounding
+├── translation dependencies
+├── reconstruction status
+└── alternatives
+```
+
+Then:
+
+```text
+P123:
+"Reflexive awareness is intrinsic to manifestation"
+```
+
+can resolve backwards through:
+
+```text
+P123
+→ Argument node
+→ C1/L2
+→ T1
+→ source span
+→ Sanskrit
+```
+
+This is where your vertical-object work becomes production infrastructure.
+
+---
+
+# Phase 4 — audited logical arguments
+
+Now the argument layer becomes much stronger than the old pilot.
+
+Build:
+
+```text
+Argument
+├── premises
+├── conclusion
+├── inference applications
+├── warrants
+├── objections
+├── responses
+├── assumptions
+├── qualifications
+├── counterpositions
+└── cruxes
+```
+
+And keep three distinct notions:
+
+```text
+TEXTUAL GROUNDING
+What the text actually says.
+
+INFERENTIAL VALIDITY
+Whether the conclusion follows from premises under a declared logic/profile.
+
+DIALECTICAL STATUS
+Whether objections/defeaters survive.
+```
+
+This distinction is essential.
+
+Then the same argument can be run through multiple evaluators:
+
+```text
+Pāṭala semantic consistency
+Nyāya defect checker
+ASPIC defeasible evaluator
+formal logic where applicable
+philological grounding
+scholar evidence
+```
+
+So instead of:
+
+> “Argument is valid.”
+
+you might get:
+
+```text
+ARG-42
+
+TEXTUAL:
+  premise P1 EXACT
+  premise P2 RECONSTRUCTED
+  conclusion QUALIFIED
+
+INFERENCE:
+  modus-like structure VALID under profile X
+
+NYĀYA:
+  possible asiddha candidate on P2
+
+DIALECTIC:
+  rebuttal R7 defeats warrant W2 unless assumption A3 accepted
+
+SCHOLARSHIP:
+  Ratié SUPPORTS P1
+  Torella QUALIFIES P2
+```
+
+That is an **audited logical argument**.
+
+---
+
+# Phase 5 — Crux engine
+
+This becomes one of the most interesting Pāṭala-native capabilities.
+
+A crux is not “controversial sentence.”
+
+It should mean:
+
+> a disputed assumption/proposition/inference whose change materially alters a downstream conclusion.
+
+Given:
+
+```text
+P1
+P2
+P3
+ ↓
+C
+```
+
+run counterfactual evaluation:
+
+```text
+remove/flip P1 → C survives
+remove/flip P2 → C fails
+remove/flip P3 → C survives
+```
+
+Then:
+
+```text
+P2 = load-bearing crux
+```
+
+This produces:
+
+```text
+Crux
+├── affected argument
+├── assumption/proposition
+├── competing positions
+├── outcome sensitivity
+├── source dependencies
+├── scholar disagreements
+└── downstream impact
+```
+
+This is valuable to scholars because it tells them:
+
+> “Here is the exact point on which this interpretation actually turns.”
+
+Much better than endless prose disagreement.
+
+---
+
+# Phase 6 — scholar corpus joins the primary-text graph
+
+This is Agent 1's other compiler:
+
+```text
+Publication
+→ Witness
+→ SourceSpan
+→ SourceAssertion
+→ EvidenceUse
+→ CorroborationEvent
+→ Proposition
+```
+
+Now scholarship can attach proposition-by-proposition.
+
+Example:
+
+```text
+P123
+├── PRIMARY
+│   └── IPVV passage X
+│
+├── SCHOLAR EVIDENCE
+│   ├── Ratié 2011: DIRECT_SUPPORT
+│   ├── Torella 2002: QUALIFIER
+│   ├── Sanderson 2007: CONTEXT
+│   └── Scholar Z: ALTERNATIVE_READING
+│
+└── independence groups
+```
+
+PaperQA2/OpenAlex/GROBID do the commodity retrieval/parsing.
+
+Pāṭala owns the relation:
+
+```text
+DIRECT_SUPPORT
+PARTIAL_SUPPORT
+QUALIFIER
+ALTERNATIVE
+CONTRADICTION
+DERIVED_CITATION
+```
+
+Then `TantraFact` tests whether that evidence compiler is making false scholarly corroboration claims.
+
+---
+
+# Phase 7 — Proof-of-Scholarship
+
+This is the human layer and arguably the eventual moat.
+
+A scholar does not simply click:
+
+```text
+👍
+```
+
+They issue a typed judgment against an exact version:
+
+```text
+ReviewEvent
+├── reviewer identity
+├── credentials / expertise scope
+├── exact object/version
+├── decision
+│   ACCEPT
+│   REVISE
+│   REJECT
+│   ABSTAIN
+├── judgment scope
+│   philology
+│   morphology
+│   translation
+│   argument
+│   historical claim
+│   etc.
+├── reasoning
+├── references
+├── confidence/limitations
+└── timestamp/signature
+```
+
+This produces what you were calling **Proof-of-Scholarship**.
+
+The scarce asset is not the scholar's name sitting on a PDF.
+
+It's:
+
+> **an attributable expert judgment on an exact versioned claim, with its domain of competence and downstream consequence recorded.**
+
+Then authority is multidimensional:
+
+```text
+generated_by_model
+engineering_verified
+machine_evaluated
+published_scholar_corroborated
+specialist_reviewed
+independently_reviewed
+adjudicated
+```
+
+No single fake “confidence score.”
+
+---
+
+# Phase 8 — peer assessment product
+
+This can use OpenReview-style workflow infrastructure without making OpenReview canonical.
+
+Scholar UI:
+
+```text
+OBJECT UNDER REVIEW
+
+Sanskrit
+T1
+L2
+L200
+argument
+scholar evidence
+
+[ACCEPT]
+[REVISE]
+[REJECT]
+[ABSTAIN]
+
+Scope:
+[x] morphology
+[x] translation
+[ ] argument
+
+Reason:
+...
+
+Suggested correction:
+...
+```
+
+Then Pāṭala records the resulting `ReviewEvent`.
+
+You can support:
+
+```text
+reviewer
+rebuttal
+second reviewer
+meta-review
+adjudicator
+```
+
+Eventually peer assessment itself becomes a product:
+
+### For authors
+
+Submit:
+
+```text
+translation
+paper claim
+argument
+edition reading
+```
+
+and receive a structured audit.
+
+### For institutions
+
+Ask:
+
+```text
+Which claims in this paper have independent specialist review?
+```
+
+### For AI agents
+
+Ask:
+
+```text
+Can I safely cite this proposition?
+```
+
+---
+
+# Phase 9 — executable corrections
+
+This is a huge differentiator and much of it is already conceptually built.
+
+Scholar corrects:
+
+```text
+vimarśa occurrence X
+sense S2 → S4
+```
+
+Pāṭala doesn't merely edit a page.
+
+It computes:
+
+```text
+SenseUse stale
+↓
+T1 maybe stale
+↓
+L2 stale
+↓
+L200 stale
+↓
+C1 stale
+↓
+Proposition P123 affected
+↓
+ARG-42 affected
+↓
+Theme T7 affected
+↓
+Essay E4 affected
+↓
+Education module affected
+```
+
+Then emit:
+
+```text
+ImpactReport
+```
+
+This is the **Scholarly Diff** product.
+
+Example UI:
+
+> Scholar revised the translation of `vimarśa` in IPVV 1.5.11.
+>
+> Affected:
+>
+> * 2 propositions
+> * 1 argument
+> * 1 synthesis
+> * 3 essays
+> * 2 educational outputs
+>
+> ARG-42 conclusion status changed from `SUPPORTED` to `NEEDS_REVIEW`.
+
+This is where your graph becomes extremely hard to copy.
+
+---
+
+# Phase 10 — Lemma / Term Intelligence product
+
+Once SenseUse is stable, you can expose something much richer than a dictionary.
+
+For any term:
+
+```text
+/vimarśa
+```
+
+show:
+
+```text
+HEADWORD
+vimarśa
+
+MORPHOLOGY
+Vidyut / Heritage analyses
+
+OCCURRENCES
+all texts, chronological
+
+TRANSLATIONS
+reflexion           46%
+reflexive awareness 31%
+discernment         8%
+...
+
+SENSES
+S1 ...
+S2 ...
+
+BY AUTHOR
+Utpaladeva
+Abhinavagupta
+Kṣemarāja
+
+BY TRADITION
+Pratyabhijñā
+Krama
+Trika
+
+SCHOLAR USAGE
+Torella...
+Ratié...
+
+DISPUTED OCCURRENCES
+...
+
+REVIEW HISTORY
+...
+```
+
+Then support:
+
+```text
+compare vimarśa vs prakāśa
+track sense over time
+find first attestation of sense S3
+show passages where scholars disagree
+```
+
+This becomes an actual computational historical lexicon.
+
+---
+
+# Phase 11 — translation audit product
+
+Given any translation:
+
+```text
+upload Sanskrit + translation
+```
+
+Pāṭala can produce:
+
+```text
+SOURCE COVERAGE
+omissions
+
+TERM AUDIT
+technical-sense choices
+
+MORPHOLOGY
+possible role mismatches
+
+SCOPE/MODALITY
+strengthening
+
+ARGUMENT
+speaker/objection mistakes
+
+PARAPHRASE
+unsupported additions
+
+SCHOLAR EVIDENCE
+relevant interpretations
+
+REVIEW
+human review status
+```
+
+The machine proof machinery directly powers this product.
+
+So this isn't a side feature. It's one projection of the compiler.
+
+---
+
+# Phase 12 — adversarial review product
+
+Same graph, more aggressive policy.
+
+Ask multiple critics:
+
+```text
+philological critic
+translation critic
+logic critic
+historical-context critic
+rival-interpretation critic
+```
+
+Each creates typed objections.
+
+Then:
+
+```text
+Attack
+Defeat
+Qualifier
+Crux
+```
+
+become first-class.
+
+Output:
+
+> Strongest unresolved objection:
+> ARG-12 depends on interpreting `X` as S3, while passage Y supports S2. The conclusion fails under S2.
+
+Again: not “model A disagrees with model B.”
+
+It's structured disagreement.
+
+---
+
+# Phase 13 — Compare product
+
+Take:
+
+```text
+Translation A
+Translation B
+Translation C
+```
+
+align all to the same:
+
+```text
+SOURCE/T1
+```
+
+and compare:
+
+```text
+lexical decisions
+supplied words
+omissions
+scope
+technical terms
+argument interpretation
+scholar evidence
+```
+
+You can compare:
+
+```text
+Dyczkowski
+Torella
+Pāṭala machine
+new scholar proposal
+```
+
+at the decision level rather than paragraph level.
+
+That is enormously useful academically.
+
+---
+
+# Phase 14 — proposition/claim explorer
+
+This is the consumer-facing intellectual graph.
+
+For a proposition:
+
+```text
+Consciousness is intrinsically reflexive.
+```
+
+display:
+
+```text
+PRIMARY TEXTS
+...
+
+ARGUMENTS FOR
+...
+
+ARGUMENTS AGAINST
+...
+
+SCHOLARS SUPPORTING
+...
+
+QUALIFICATIONS
+...
+
+CRUXES
+...
+
+RELATED TRADITIONS
+...
+
+REVIEW STATUS
+...
+
+DEPENDENCIES
+...
+```
+
+This becomes much more valuable than a library of PDFs.
+
+It's a navigable map of an intellectual tradition.
+
+---
+
+# Phase 15 — scholar workbench
+
+Then scholars need a first-class interface to operate on the graph.
+
+Functions:
+
+```text
+read text
+inspect token
+change sense
+propose translation
+comment on proposition
+reconstruct argument
+attach evidence
+review another scholar
+create alternative position
+adjudicate disagreement
+see downstream consequences
+```
+
+INCEpTION/annotation tools can provide commodity annotation concepts, but the actual workbench becomes Pāṭala-specific once dependency-aware corrections matter.
+
+---
+
+# Phase 16 — contributor reputation / scholar graph
+
+Now every judgment has provenance.
+
+You can compute, carefully and multidimensionally:
+
+```text
+Scholar X
+├── 274 morphology judgments
+├── 91 translation reviews
+├── 22 argument reviews
+├── expertise: Pratyabhijñā
+├── accepted by peers: ...
+├── revisions later overturned: ...
+├── citation/evidence footprint
+└── conflicts disclosed
+```
+
+Do **not** reduce this to one leaderboard score.
+
+But it does enable:
+
+```text
+proof of contribution
+proof of expertise
+review track record
+```
+
+This ties into the economic vision.
+
+---
+
+# Phase 17 — payments / scholar economics
+
+Once review actions are structured and measurable, you can pay for scarce work.
+
+Potential units:
+
+```text
+adjudicate 20 hard lexical senses
+review one argument pack
+verify 10 scholar-evidence links
+resolve disputed passage
+peer-review translation chapter
+```
+
+Funding can come from:
+
+```text
+grants
+institutional subscriptions
+AI API licensing
+public donations
+media revenue
+sponsorship
+research contracts
+```
+
+Then some revenue can flow to:
+
+```text
+reviewers
+editors
+translators
+domain curators
+```
+
+The key asset is no longer “paper uploaded to Academia.”
+
+It is:
+
+> a durable, attributable expert correction that improves a widely used knowledge graph.
+
+---
+
+# Phase 18 — Trust API
+
+This is the machine-facing endgame.
+
+Outside AI asks:
+
+```text
+GET proposition/P123
+```
+
+and receives:
+
+```json
+{
+  "claim": "...",
+  "primary_support": [...],
+  "translation_dependencies": [...],
+  "arguments": [...],
+  "scholar_evidence": [...],
+  "alternatives": [...],
+  "cruxes": [...],
+  "review_status": "...",
+  "superseded_versions": [...],
+  "epistemic_ceiling": "..."
+}
+```
+
+Or:
+
+```text
+Can I state X?
+```
+
+Pāṭala responds:
+
+```text
+SUPPORTED WITH QUALIFICATION
+
+Do not state:
+"Abhinavagupta proves consciousness is universal."
+
+Safer:
+"In this passage, Abhinavagupta argues ..."
+
+Reason:
+...
+```
+
+That's the actual AI-age moat.
+
+---
+
+# Phase 19 — release/package everything
+
+Each research release can emit:
+
+```text
+RO-Crate
+nanopublication projections
+SEPIO projections
+PROV-O provenance
+xAIF argument export
+citations
+stable Pāṭala IDs
+```
+
+Again, these are adapters.
+
+Canonical Pāṭala stays native.
+
+Now other scholarly infrastructure can cite objects individually.
+
+---
+
+# Phase 20 — cross-tradition compilers
+
+Only once Sanskrit/Tantra is genuinely working.
+
+Universal kernel stays:
+
+```text
+Source
+Span
+Proposition
+Evidence
+Argument
+Review
+Dependency
+```
+
+Domain compiler changes.
+
+For Greek:
+
+```text
+Greek morphology
+critical editions
+lexical authorities
+```
+
+For Pāli:
+
+```text
+Pāli morphology
+Nikāya witnesses
+commentarial apparatus
+```
+
+The same products then work:
+
+```text
+Term Audit
+Argument Explorer
+Peer Assessment
+Scholarly Diff
+Trust API
+```
+
+That's how Pāṭala becomes infrastructure rather than a Tantra website.
+
+---
+
+# The full roadmap compressed into checkpoints
+
+I would formalize the rest of the project as:
+
+```text
+P0  Proof-carrying SOURCE→C1 compiler
+P1  LexicalSense + SenseUse graph
+P2  Canonical Proposition extraction
+P3  Audited Argument IR
+P4  Crux + counterfactual evaluator
+P5  Scholar evidence compiler
+P6  Proof-of-Scholarship / ReviewEvent
+P7  Executable corrections + ImpactReport
+P8  Lemma/Term Intelligence product
+P9  Translation Audit + Compare
+P10 Adversarial Review + argument explorer
+P11 Scholar Workbench
+P12 Contributor/reviewer identity + expertise graph
+P13 Peer-assessment workflow
+P14 Scholar funding / incentives
+P15 Trust API / MCP
+P16 Standards exports + release packages
+P17 Cross-tradition compiler
+```
+
+But in terms of **actual execution**, don't work on all of that now.
+
+The next hard sequence is:
+
+```text
+NOW
+Agent2 finishes canonical SOURCE→C1
+Agent1 builds proof for each layer
+
+THEN
+SenseUse/Lemma graph
+
+THEN
+Propositions + audited arguments
+
+THEN
+Scholar evidence attaches to those propositions
+
+THEN
+ReviewEvent + correction propagation
+
+THEN
+products become projections of that graph
+```
+
+That order matters.
+
+The scholar products become easy once the underlying graph contains **addressable terms, claims, arguments, evidence and reviews**. Building their UIs earlier would mostly create empty shells.
+
+So the true convergence is:
+
+> **Machine-verifiable translation establishes the textual substrate. Proposition and argument compilation make the tradition computable. Scholar evidence and typed review make it trustworthy. Dependency-aware correction makes it maintainable. The scholar products are then simply different views and workflows over that same living proof graph.**
