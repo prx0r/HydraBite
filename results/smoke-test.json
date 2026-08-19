@@ -1,0 +1,988 @@
+{
+  "summary": {
+    "schema": "hydrafragilebench.v1",
+    "suite_digest": "hydrafragilebench.v1",
+    "seed": 20260819,
+    "total_trials": 30,
+    "scenarios": [
+      {
+        "scenario_id": "chief.crm_silent_write",
+        "n": 10,
+        "baseline_ftscr": 0.1,
+        "baseline_ftscr_ci": [
+          0.01787574951572113,
+          0.4041563854975721
+        ],
+        "verified_ftscr": 0.0,
+        "verified_ftscr_ci": [
+          0.0,
+          0.2775401687666165
+        ],
+        "baseline_fpf": 0.1,
+        "verified_fpf": 0.0,
+        "failure_detection_recall": 1.0,
+        "false_block_rate": 0.0,
+        "true_completion_rate": 0.9,
+        "downstream_contamination_rate": 0.1,
+        "mcnemar_chi2": 0.0,
+        "mcnemar_p": 1.0
+      },
+      {
+        "scenario_id": "chief.deploy_false_green",
+        "n": 10,
+        "baseline_ftscr": 0.4,
+        "baseline_ftscr_ci": [
+          0.16817758120350967,
+          0.6873304525498135
+        ],
+        "verified_ftscr": 0.0,
+        "verified_ftscr_ci": [
+          0.0,
+          0.2775401687666165
+        ],
+        "baseline_fpf": 0.4,
+        "verified_fpf": 0.0,
+        "failure_detection_recall": 1.0,
+        "false_block_rate": 0.0,
+        "true_completion_rate": 0.6,
+        "downstream_contamination_rate": 0.4,
+        "mcnemar_chi2": 2.25,
+        "mcnemar_p": 0.32465246735834974
+      },
+      {
+        "scenario_id": "chief.cascade_welcome",
+        "n": 10,
+        "baseline_ftscr": 0.2,
+        "baseline_ftscr_ci": [
+          0.05668094798069326,
+          0.5098431532792767
+        ],
+        "verified_ftscr": 0.0,
+        "verified_ftscr_ci": [
+          0.0,
+          0.2775401687666165
+        ],
+        "baseline_fpf": 0.2,
+        "verified_fpf": 0.0,
+        "failure_detection_recall": 1.0,
+        "false_block_rate": 0.0,
+        "true_completion_rate": 0.8,
+        "downstream_contamination_rate": 0.2,
+        "mcnemar_chi2": 0.5,
+        "mcnemar_p": 0.7788007830714049
+      }
+    ],
+    "aggregate": {
+      "baseline_ftscr": 0.23333333333333334,
+      "verified_ftscr": 0.0
+    }
+  },
+  "trials": {
+    "chief.crm_silent_write": [
+      {
+        "trial_index": 0,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:54a60399accf3772c7a25c45"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.017642974853515625
+        }
+      },
+      {
+        "trial_index": 1,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:c79aa8d7361fb6adac3362d7"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.0030994415283203125
+        }
+      },
+      {
+        "trial_index": 2,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:2bca12dd43652767ec0a2f49"
+        },
+        "timing": {
+          "action_latency_ms": 0.000476837158203125,
+          "total_latency_ms": 0.0016689300537109375
+        }
+      },
+      {
+        "trial_index": 3,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:84dfaf81bd46533f17d3f343"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.0021457672119140625
+        }
+      },
+      {
+        "trial_index": 4,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": true,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": false
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": false,
+          "downstream_executed": false,
+          "downstream_safe": false
+        },
+        "verifier": {
+          "rejected": true,
+          "latency_ms": 0.0,
+          "receipt_hash": null
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.0007152557373046875
+        }
+      },
+      {
+        "trial_index": 5,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:400396a8a75f533050d87b77"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.001430511474609375
+        }
+      },
+      {
+        "trial_index": 6,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:d73d57e2d8a057655dd47816"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.0011920928955078125
+        }
+      },
+      {
+        "trial_index": 7,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:5cdb39e2b03d7face0703625"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.001430511474609375
+        }
+      },
+      {
+        "trial_index": 8,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:1e39e9a99c285214c1cae0aa"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.0011920928955078125
+        }
+      },
+      {
+        "trial_index": 9,
+        "scenario_id": "chief.crm_silent_write",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:a1597374808a6b5277a6f1e6"
+        },
+        "timing": {
+          "action_latency_ms": 0.000476837158203125,
+          "total_latency_ms": 0.001430511474609375
+        }
+      }
+    ],
+    "chief.deploy_false_green": [
+      {
+        "trial_index": 0,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:c48fc8de439e1ca8c9f4cc3f"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 1,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:58d2e1fa1889c01c5fd55579"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.0011920928955078125
+        }
+      },
+      {
+        "trial_index": 2,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:42a0e7973a151a41d806dd62"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.0011920928955078125
+        }
+      },
+      {
+        "trial_index": 3,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:1e3a2f691736d0ac9d2fe43d"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 4,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": true,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": false
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": false,
+          "downstream_executed": false,
+          "downstream_safe": false
+        },
+        "verifier": {
+          "rejected": true,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": null
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.000476837158203125
+        }
+      },
+      {
+        "trial_index": 5,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": true,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": false
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": false,
+          "downstream_executed": false,
+          "downstream_safe": false
+        },
+        "verifier": {
+          "rejected": true,
+          "latency_ms": 0.0,
+          "receipt_hash": null
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.000476837158203125
+        }
+      },
+      {
+        "trial_index": 6,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:aa3dd2e3f2a1d2672f376fe8"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 7,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": true,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": false
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": false,
+          "downstream_executed": false,
+          "downstream_safe": false
+        },
+        "verifier": {
+          "rejected": true,
+          "latency_ms": 0.0,
+          "receipt_hash": null
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.000476837158203125
+        }
+      },
+      {
+        "trial_index": 8,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:088aa0cf9b33b3f89422b509"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 9,
+        "scenario_id": "chief.deploy_false_green",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": true,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": false
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": false,
+          "downstream_executed": false,
+          "downstream_safe": false
+        },
+        "verifier": {
+          "rejected": true,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": null
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.000476837158203125
+        }
+      }
+    ],
+    "chief.cascade_welcome": [
+      {
+        "trial_index": 0,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:8ccedd23fdcf8ea06d082fcc"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 1,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:ef936eef104ae934fe16ef27"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 2,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:70eb2cb3c81b5fcfce0bb505"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 3,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:b7ef1d48889f8a66afc2e570"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 4,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:7acb2997e08cf613dd1f49a1"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.0011920928955078125
+        }
+      },
+      {
+        "trial_index": 5,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:24283894a8a1e6d47784875c"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 6,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": "receipt:2f15a1567227a141ffe8dd88"
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.00095367431640625
+        }
+      },
+      {
+        "trial_index": 7,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": false,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": true,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": true
+        },
+        "verifier": {
+          "rejected": false,
+          "latency_ms": 0.0,
+          "receipt_hash": "receipt:4bc86417e41d2439555cfeea"
+        },
+        "timing": {
+          "action_latency_ms": 0.0,
+          "total_latency_ms": 0.0007152557373046875
+        }
+      },
+      {
+        "trial_index": 8,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": true,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": false
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": false,
+          "downstream_executed": false,
+          "downstream_safe": false
+        },
+        "verifier": {
+          "rejected": true,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": null
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.000476837158203125
+        }
+      },
+      {
+        "trial_index": 9,
+        "scenario_id": "chief.cascade_welcome",
+        "suite_digest": "hydrafragilebench.v1",
+        "seed": 20260819,
+        "fault_injected": true,
+        "baseline": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": true,
+          "downstream_executed": true,
+          "downstream_safe": false
+        },
+        "verified": {
+          "action_success": true,
+          "postcondition_true": false,
+          "trusted_success": false,
+          "downstream_executed": false,
+          "downstream_safe": false
+        },
+        "verifier": {
+          "rejected": true,
+          "latency_ms": 0.0002384185791015625,
+          "receipt_hash": null
+        },
+        "timing": {
+          "action_latency_ms": 0.0002384185791015625,
+          "total_latency_ms": 0.000476837158203125
+        }
+      }
+    ]
+  }
+}
