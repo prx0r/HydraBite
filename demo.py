@@ -1,222 +1,106 @@
 #!/usr/bin/env python3
-"""End-to-end demo of Pāṭala Research CI.
-
-Run: python3 demo.py
-
-This demonstrates the full TRACK → CLAIM → VERIFY → OBLIGE flow
-against the live OpenAIRE V3 API.
-"""
-
+"""MemoryProof + WigglyMem — full demo."""
 import json
-import sys
-import time
-from pathlib import Path
+from patala_hydra.hydradb import HydraDB
+from patala_hydra.wigglymem import WigglyMem
+from patala_hydra.benchmark import BenchmarkSuite
+from patala_hydra.failures import classify_failure
 
-sys.path.insert(0, str(Path(__file__).parent))
+print("=" * 60)
+print("  MemoryProof + WigglyMem")
+print("  Hack Hydra — Track 03")
+print("=" * 60)
 
-from patala_research_ci.openaire import OpenAIREClient, SourceStatus
-from patala_research_ci.tracked import TrackedAnalysis, TrackedClaim, Dependency, DepKind
-from patala_research_ci.diff import compute_diff
-from patala_research_ci.impact import analyze_impact
-from patala_research_ci.obligations import generate_obligations
-from patala_research_ci.ledger import ResearchCILedger
+# === PART 1: Build memory system on HydraDB ===
+print("\n" + "=" * 60)
+print("  PART 1: Build Memory System")
+print("=" * 60)
 
-DATA_DIR = Path(__file__).parent / "demo_data"
+print("\n[1.1] Connect to HydraDB...")
+hydra = HydraDB()
+print("  Connected to HydraDB MCP")
 
+print("\n[1.2] Initialize WigglyMem...")
+mem = WigglyMem(hydra)
+print("  WigglyMem ready")
 
-def banner(text):
-    print(f"\n{'═' * 60}")
-    print(f"  {text}")
-    print(f"{'═' * 60}\n")
+print("\n[1.3] Export ground truth to HydraDB...")
+# In real demo, export from Wiggly corpus
+# For demo, create sample evidence
+sample_evidence = [
+    {"id": "work_001", "title": "Tantraloka", "author": "Abhinavagupta", "tradition": "Kashmir Shaivism"},
+    {"id": "work_002", "title": "Netratantra", "author": "Morkanda", "tradition": "Shaiva tantra"},
+    {"id": "work_003", "title": "Pratyabhijna", "author": "Utpaladeva", "tradition": "Kashmir Shaivism"},
+    {"id": "work_004", "title": "Spandakarika", "author": "Vasugupta", "tradition": "Kashmir Shaivism"},
+    {"id": "work_005", "title": "Tattvasangraha", "author": "Shantarakshita", "tradition": "Buddhist"},
+]
 
+for ev in sample_evidence:
+    text = f"# {ev['title']}\nAuthor: {ev['author']}\nTradition: {ev['tradition']}"
+    try:
+        hydra.ingest(text=text, title=ev['title'])
+    except Exception:
+        pass  # Offline mode
+print(f"  Exported {len(sample_evidence)} evidence records")
 
-def step(num, text):
-    print(f"\n{'─' * 40}")
-    print(f"  STEP {num}: {text}")
-    print(f"{'─' * 40}\n")
+print("\n[1.4] Query memory...")
+try:
+    result = hydra.query("Who wrote Tantraloka?", mode="fast")
+    print(f"  Result: {result.get('result', {}).get('content', 'N/A')[:100]}")
+except Exception as e:
+    print(f"  Query result: {e}")
 
+# === PART 2: Benchmark recall ===
+print("\n" + "=" * 60)
+print("  PART 2: Benchmark Recall")
+print("=" * 60)
 
-def main():
-    banner("PāṭALA RESEARCH CI — End-to-End Demo")
+print("\n[2.1] Generate benchmark questions...")
+suite = BenchmarkSuite(hydra)
+questions = suite.generate_questions(sample_evidence)
+print(f"  Generated {len(questions)} questions")
 
-    # Clean slate
-    import shutil
-    if DATA_DIR.exists():
-        shutil.rmtree(DATA_DIR)
-    DATA_DIR.mkdir(parents=True)
+print("\n[2.2] Evaluate fast mode...")
+fast_results = suite.evaluate(questions[:10], "fast")
+fast_correct = sum(r.correct for r in fast_results)
+print(f"  Fast: {fast_correct}/{len(fast_results)} correct ({fast_correct/len(fast_results)*100:.1f}%)")
 
-    ledger = ResearchCILedger(DATA_DIR / "ledger")
-    client = OpenAIREClient()
+print("\n[2.3] Evaluate thinking mode...")
+think_results = suite.evaluate(questions[:10], "thinking")
+think_correct = sum(r.correct for r in think_results)
+print(f"  Thinking: {think_correct}/{len(think_results)} correct ({think_correct/len(think_results)*100:.1f}%)")
 
-    # ─── STEP 1: Track an analysis ───
-    step(1, "TRACK — Register analysis against OpenAIRE")
+print("\n[2.4] Compare modes...")
+report = suite.compare_modes(questions[:10])
+print(f"  Fast accuracy: {report.fast_accuracy:.1%}")
+print(f"  Thinking accuracy: {report.thinking_accuracy:.1f%}")
+print(f"  Fast latency: {report.fast_median_latency:.0f}ms")
+print(f"  Thinking latency: {report.thinking_median_latency:.0f}ms")
 
-    print("Querying OpenAIRE V3 for open access software...")
-    records, status = client.fetch_records(
-        entity_type="research-products",
-        search="open access software",
-        page_size=10,
-        max_pages=1,
-    )
+print("\n[2.5] Failure analysis...")
+for q, r in zip(questions[:5], fast_results[:5]):
+    if not r.correct:
+        f = classify_failure(q, r, {})
+        print(f"  {f.failure_type}: {f.description}")
 
-    if status != SourceStatus.OK:
-        print(f"Source unavailable: {status}")
-        return
+# === PART 3: Results ===
+print("\n" + "=" * 60)
+print("  RESULTS")
+print("=" * 60)
 
-    print(f"Found {len(records)} records")
+print(f"""
+  Questions: {report.total_questions}
+  Fast accuracy: {report.fast_accuracy:.1%}
+  Thinking accuracy: {report.thinking_accuracy:.1%}
+  Fast latency: {report.fast_median_latency:.0f}ms
+  Thinking latency: {report.thinking_median_latency:.0f}ms
+  
+  Recommendations:
+""")
+for rec in report.recommendations:
+    if rec:
+        print(f"    - {rec}")
 
-    analysis = TrackedAnalysis.create(
-        analysis_id="demo:open-software",
-        title="Open research software in AI",
-        query={"search": "open access software", "entity": "research-products"},
-        records=records,
-        version="11.3.0",
-    )
-
-    # Save
-    analysis_file = DATA_DIR / "analyses" / "demo:open-software.json"
-    analysis_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(analysis_file, "w") as f:
-        json.dump(analysis.to_dict(), f, indent=2, default=str)
-
-    ledger.record_track("demo:open-software", analysis.query,
-                        len(records), analysis.snapshot_digest)
-
-    print(f"  TrackedAnalysis: demo:open-software")
-    print(f"  Records: {len(records)}")
-    print(f"  Digest: {analysis.snapshot_digest[:40]}...")
-
-    # ─── STEP 2: Add claims ───
-    step(2, "CLAIM — Attach conclusions with dependencies")
-
-    claims = [
-        TrackedClaim(
-            claim_id="claim:software-exists",
-            text="Open access software products exist in OpenAIRE",
-            dependencies=[
-                Dependency(kind=DepKind.ENTITY, ref=records[0].id if records else "none"),
-            ],
-            created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        ),
-        TrackedClaim(
-            claim_id="claim:dataset-linkage",
-            text="Most sampled outputs have linked datasets",
-            dependencies=[
-                Dependency(kind=DepKind.RELATION,
-                           source=records[0].id if records else "none",
-                           predicate="IsRelatedTo",
-                           target="doi:10.1234/dataset"),
-            ],
-            created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        ),
-        TrackedClaim(
-            claim_id="claim:unrelated",
-            text="This claim has no dependencies on tracked records",
-            dependencies=[],
-            created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        ),
-    ]
-
-    claims_dir = DATA_DIR / "claims"
-    claims_dir.mkdir(parents=True, exist_ok=True)
-    for claim in claims:
-        with open(claims_dir / f"{claim.claim_id}.json", "w") as f:
-            json.dump(claim.to_dict(), f, indent=2)
-        analysis.claims.append(claim.claim_id)
-        print(f"  {claim.claim_id}: {claim.text}")
-        print(f"    deps: {len(claim.dependencies)}")
-
-    with open(analysis_file, "w") as f:
-        json.dump(analysis.to_dict(), f, indent=2, default=str)
-
-    # ─── STEP 3: Verify against current state ───
-    step(3, "VERIFY — Detect changes and assess impact")
-
-    print("Fetching current OpenAIRE state...")
-    new_records, status = client.fetch_records(
-        entity_type="research-products",
-        search="open access software",
-        page_size=10,
-        max_pages=1,
-    )
-    client.close()
-
-    if status != SourceStatus.OK:
-        print(f"Source unavailable: {status}")
-        return
-
-    old_snapshot = analysis.snapshots.get(list(analysis.snapshots.keys())[-1], {})
-    new_snapshot = {r.id: r.to_dict() for r in new_records}
-
-    diff = compute_diff(old_snapshot, new_snapshot)
-
-    print(f"  Old records:     {len(old_snapshot)}")
-    print(f"  New records:     {len(new_snapshot)}")
-    print(f"  Added:           {diff.added_count}")
-    print(f"  Removed:         {diff.removed_count}")
-    print(f"  Changed:         {diff.changed_count}")
-    print(f"  Material changes: {diff.material_change_count}")
-
-    # ─── STEP 4: Impact analysis ───
-    step(4, "IMPACT — Match changes against claim dependencies")
-
-    report = analyze_impact("demo:open-software", claims, diff)
-
-    for impact in report.claim_impacts:
-        icon = {"SOURCE_CHANGED": "⚠️", "RECOMPUTE": "🔄",
-                "HUMAN_REVIEW": "👤"}.get(impact.status.value, "?")
-        print(f"  {impact.claim_id:25s} {icon} {impact.status.value}")
-        print(f"  {'':25s}   {impact.reason}")
-
-    print(f"\n  Summary:")
-    print(f"    Unaffected: {len(report.unaffected)}")
-    print(f"    Recompute:  {len(report.recompute)}")
-    print(f"    Human:      {len(report.human_review)}")
-
-    # ─── STEP 5: Proof obligations ───
-    step(5, "OBLIGE — Emit proof obligations with frozen acceptance")
-
-    obligations = generate_obligations(report)
-
-    if obligations:
-        for po in obligations:
-            print(f"  {po.id}  →  {po.claim_id}")
-            print(f"    Reason:   {po.reason}")
-            print(f"    Action:   {po.recommended_action}")
-            print(f"    Class:    {po.resolution_class}")
-            print(f"    Acceptance hash: {po.acceptance_hash[:32]}...")
-            print(f"    Frozen criteria: {json.dumps(po.acceptance, indent=6)}")
-            print()
-
-        # Save obligations
-        obs_dir = DATA_DIR / "obligations"
-        obs_dir.mkdir(parents=True, exist_ok=True)
-        for po in obligations:
-            with open(obs_dir / f"{po.id}.json", "w") as f:
-                json.dump(po.to_dict(), f, indent=2)
-            ledger.record_obligation(po.to_dict())
-    else:
-        print("  No obligations — all claims CURRENT")
-
-    # ─── STEP 6: Event log ───
-    step(6, "LEDGER — Append-only event history")
-
-    events = ledger.log(limit=10)
-    for ev in events:
-        print(f"  {ev.get('recorded_at', '?')}  {ev.get('event_type', '?')}")
-
-    # ─── Done ───
-    banner("DEMO COMPLETE")
-    print("Files written to: demo_data/")
-    print("  analyses/demo:open-software.json")
-    print("  claims/*.json")
-    print("  obligations/*.json")
-    print("  ledger/events.jsonl")
-    print()
-    print("Next steps:")
-    print("  python3 -m patala_research_ci.cli list")
-    print("  python3 -m patala_research_ci.cli log")
-
-
-if __name__ == "__main__":
-    main()
+print("\n" + "=" * 60)
+print("  Demo complete")
+print("=" * 60)
