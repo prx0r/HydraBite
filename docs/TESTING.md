@@ -32,7 +32,7 @@ Checks:
 ## Layer 2 — Hydra runtime identity proof
 
 ```bash
-hydrabite prove-hydra --json validation/hydra-proof.json
+iolaus prove-hydra --json validation/hydra-proof.json
 ```
 
 Hard conditions:
@@ -70,10 +70,10 @@ A deterministic sequence of honest, silent-failure and wrong-record executions c
 
 ```text
 naive baseline: tool.success == true → commit
-HydraBite: verifier PASS → commit
+Iolaus: verifier PASS → commit
 ```
 
-The benchmark is accepted only if HydraBite creates zero false trusted commits and promotes every honest case.
+The benchmark is accepted only if Iolaus creates zero false trusted commits and promotes every honest case.
 
 ## Layer 5 — full certificate
 

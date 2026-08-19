@@ -1,4 +1,4 @@
-"""HydraBite models — matching test expectations."""
+"""Iolaus models — matching test expectations."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum

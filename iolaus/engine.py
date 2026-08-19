@@ -1,4 +1,4 @@
-"""HydraBite engine — core verified state transition logic."""
+"""Iolaus engine — core verified state transition logic."""
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -27,7 +27,7 @@ class BiteResult:
     message: str = ""
 
 
-class HydraBiteEngine:
+class IolausEngine:
     """Core engine for verified state transitions."""
 
     def __init__(self, hydra: HydraClient, signer: ReceiptSigner):

@@ -1,6 +1,6 @@
 # The one-line architectural patch to HydraDB's AI Chief of Staff recipe
 
-HydraDB's current recipe has the right division of labor: HydraDB selects functions and the application orchestrator executes them. HydraBite does **not** put routing intelligence back in the orchestrator.
+HydraDB's current recipe has the right division of labor: HydraDB selects functions and the application orchestrator executes them. Iolaus does **not** put routing intelligence back in the orchestrator.
 
 It changes the feedback boundary.
 
@@ -18,7 +18,7 @@ hydra.ingest_memory(
 )
 ```
 
-## With HydraBite
+## With Iolaus
 
 ```python
 suggestion = hydra.select_function(task)
@@ -46,7 +46,7 @@ else:
     handle_unverified(result)
 ```
 
-The orchestrator remains thin. HydraDB remains the selection/reasoning layer. HydraBite gives the orchestrator a principled distinction between:
+The orchestrator remains thin. HydraDB remains the selection/reasoning layer. Iolaus gives the orchestrator a principled distinction between:
 
 ```text
 CALL RETURNED
@@ -108,10 +108,10 @@ postcondition:
 
 Self-improving routing is only as good as its outcome labels. If “success” is populated from executor self-report, silent semantic failures become noisy positive examples.
 
-HydraBite changes the outcome signal to:
+Iolaus changes the outcome signal to:
 
 ```text
 VERIFIED / REJECTED / BLOCKED / EXECUTION_FAILED
 ```
 
-and attaches an evidence path. The existing Hydra feedback loop can then learn from a cleaner target without HydraBite becoming another router.
+and attaches an evidence path. The existing Hydra feedback loop can then learn from a cleaner target without Iolaus becoming another router.

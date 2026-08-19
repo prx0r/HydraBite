@@ -1,4 +1,4 @@
-"""HydraBite canonical — hashing and identity."""
+"""Iolaus canonical — hashing and identity."""
 from __future__ import annotations
 import hashlib
 import json

@@ -20,7 +20,7 @@ Execution result
 HydraDB feedback / memory
 ```
 
-The recipe's strength is intelligent function routing and composition. HydraBite inserts only one thing between `Execution result` and `feedback`:
+The recipe's strength is intelligent function routing and composition. Iolaus inserts only one thing between `Execution result` and `feedback`:
 
 ```text
 External API
@@ -43,22 +43,22 @@ contract-authorized verifier
 
 ### Customer success
 Current sequence can create a demo meeting, update CRM and send confirmation.
-HydraBite prevents `send_confirmation_email` from being enabled by a calendar API that merely *reported* a booking. A calendar readback can certify the meeting ID/start time first.
+Iolaus prevents `send_confirmation_email` from being enabled by a calendar API that merely *reported* a booking. A calendar readback can certify the meeting ID/start time first.
 
 ### Executive assistant
 “Prepare the board meeting” spans generated documents, calendar state, reminders and KPI sources. Each irreversible action can declare a different verifier strength instead of treating all `success` responses equally.
 
 ### DevOps incident response
-`scale_database_resources` returning success is weaker than `service_health == healthy` after the scale operation. HydraBite turns health/readiness into the postcondition that enables the status update or closes remediation.
+`scale_database_resources` returning success is weaker than `service_health == healthy` after the scale operation. Iolaus turns health/readiness into the postcondition that enables the status update or closes remediation.
 
 ### Finance / approvals
-The recipe already calls out policy and approval workflows. HydraBite complements them: authorization answers **may this action run?**; verification answers **did the authorized action actually achieve its declared effect?**
+The recipe already calls out policy and approval workflows. Iolaus complements them: authorization answers **may this action run?**; verification answers **did the authorized action actually achieve its declared effect?**
 
-## The benchmark gap HydraBite adds
+## The benchmark gap Iolaus adds
 
 The full Function Routing cookbook reports a useful evaluation surface around thousands of tasks, dozens of registered functions, routing accuracy, multi-step completion, personalization, suggestion acceptance, and latency.
 
-HydraBite does not compete with those numbers. It adds a missing orthogonal axis:
+Iolaus does not compete with those numbers. It adds a missing orthogonal axis:
 
 ```text
 FALSE-SUCCESS COMMIT RATE

@@ -1,11 +1,11 @@
-"""CLI for HydraBite."""
+"""CLI for Iolaus."""
 import sys
-from . import HydraBite, Bite, Status
+from . import Iolaus, Bite, Status
 
 
 def main():
     import argparse
-    p = argparse.ArgumentParser(prog="hydrabite", description="Verified state transitions for agents")
+    p = argparse.ArgumentParser(prog="iolaus", description="Verified state transitions for agents")
     sub = p.add_subparsers(dest="command")
 
     d = sub.add_parser("demo", help="Run the demo")

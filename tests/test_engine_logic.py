@@ -3,11 +3,11 @@
 These tests exercise Python policy only. They are not accepted as Hydra integration evidence;
 that lives under tests/integration and must hit the OSS graph-node.
 """
-from hydrabite.engine import HydraBiteEngine, IntegrityViolation, UnauthorizedVerifier
-from hydrabite.hydra import stable_vertex_id
-from hydrabite.models import Contract, VerifierClass
-from hydrabite.receipts import ReceiptSigner
-from hydrabite.verifiers import CallableVerifier
+from iolaus.engine import IolausEngine, IntegrityViolation, UnauthorizedVerifier
+from iolaus.hydra import stable_vertex_id
+from iolaus.models import Contract, VerifierClass
+from iolaus.receipts import ReceiptSigner
+from iolaus.verifiers import CallableVerifier
 import pytest
 
 
@@ -33,7 +33,7 @@ def contract():
 
 
 def test_failed_verification_does_not_create_claim():
-    h=RecordingHydra(); e=HydraBiteEngine(h,ReceiptSigner.generate())
+    h=RecordingHydra(); e=IolausEngine(h,ReceiptSigner.generate())
     p=e.execute(contract(),lambda a:{"success":True},{"id":"1"})
     v=CallableVerifier("v",VerifierClass.DETERMINISTIC_READBACK,lambda a,o:(False,"no",{}))
     r=e.verify(contract(),p,v)
@@ -42,7 +42,7 @@ def test_failed_verification_does_not_create_claim():
 
 
 def test_pass_verification_creates_claim():
-    h=RecordingHydra(); e=HydraBiteEngine(h,ReceiptSigner.generate())
+    h=RecordingHydra(); e=IolausEngine(h,ReceiptSigner.generate())
     p=e.execute(contract(),lambda a:{"success":True},{"id":"1"})
     v=CallableVerifier("v",VerifierClass.DETERMINISTIC_READBACK,lambda a,o:(True,"yes",{}))
     r=e.verify(contract(),p,v)
@@ -52,14 +52,14 @@ def test_pass_verification_creates_claim():
 
 
 def test_contract_rejects_unauthorized_verifier():
-    h=RecordingHydra(); e=HydraBiteEngine(h,ReceiptSigner.generate())
+    h=RecordingHydra(); e=IolausEngine(h,ReceiptSigner.generate())
     p=e.execute(contract(),lambda a:{"success":True},{"id":"1"})
     v=CallableVerifier("evil",VerifierClass.HEURISTIC,lambda a,o:(True,"trust me",{}))
     with pytest.raises(UnauthorizedVerifier): e.verify(contract(),p,v)
 
 
 def test_tampered_pending_output_is_rejected_before_promotion():
-    h=RecordingHydra(); e=HydraBiteEngine(h,ReceiptSigner.generate())
+    h=RecordingHydra(); e=IolausEngine(h,ReceiptSigner.generate())
     p=e.execute(contract(),lambda a:{"success":True},{"id":"1"})
     p.output={"success":False,"forged":True}
     v=CallableVerifier("v",VerifierClass.DETERMINISTIC_READBACK,lambda a,o:(True,"yes",{}))

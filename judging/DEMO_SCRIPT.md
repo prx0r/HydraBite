@@ -11,18 +11,18 @@ uvicorn demo.app:app --port 8080
 Also keep a terminal ready with:
 
 ```bash
-hydrabite prove-hydra
+iolaus prove-hydra
 ```
 
 ## Script
 
 ### 0:00–0:20 — frame
-“Hydra already gives agents function routing. HydraBite solves one smaller problem: **when can an action result become trusted state?** This customer tool is deliberately adversarial.”
+“Hydra already gives agents function routing. Iolaus solves one smaller problem: **when can an action result become trusted state?** This customer tool is deliberately adversarial.”
 
 ### 0:20–0:40 — lying tool
 Click **Run lying tool**.
 
-Say: “The tool returns `success=true`, but I configured it to write nothing. Notice HydraBite does not mark success; it says `SUCCEEDED_UNVERIFIED`.”
+Say: “The tool returns `success=true`, but I configured it to write nothing. Notice Iolaus does not mark success; it says `SUCCEEDED_UNVERIFIED`.”
 
 ### 0:40–0:55 — verify
 Click **Verify readback**.
@@ -37,7 +37,7 @@ Say: “Welcome email requires a verified customer. It is blocked before the ema
 ### 1:10–1:30 — good path
 Click **Run honest + verify**.
 
-Say: “Same contract, same verifier. This time readback finds the exact record. HydraBite signs the receipt and creates the verified claim.”
+Say: “Same contract, same verifier. This time readback finds the exact record. Iolaus signs the receipt and creates the verified claim.”
 
 Click **Run verified downstream**.
 
@@ -47,7 +47,7 @@ Say: “Now the next action is allowed, and it must earn its own receipt.”
 Terminal:
 
 ```bash
-hydrabite prove-hydra
+iolaus prove-hydra
 ```
 
 Point at:
@@ -59,7 +59,7 @@ Point at:
 Say: “The certificate requires Hydra's native `algo.MSpaths`. A Python mock doesn't count.”
 
 ### 1:50–2:05 — finish
-“Hydra's routing benchmarks tell us whether the system chose and completed a plan. HydraBite adds the missing metric: **did false success become trusted state?** In our acceptance harness, that must stay at zero.”
+“Hydra's routing benchmarks tell us whether the system chose and completed a plan. Iolaus adds the missing metric: **did false success become trusted state?** In our acceptance harness, that must stay at zero.”
 
 Final screen:
 

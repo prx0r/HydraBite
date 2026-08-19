@@ -1,4 +1,4 @@
-"""HydraBite hydra — HydraDB OSS HTTP/OpenCypher adapter."""
+"""Iolaus hydra — HydraDB OSS HTTP/OpenCypher adapter."""
 from __future__ import annotations
 import hashlib
 import httpx

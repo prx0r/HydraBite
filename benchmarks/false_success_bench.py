@@ -1,7 +1,7 @@
-"""Failure-oriented acceptance benchmark for HydraBite.
+"""Failure-oriented acceptance benchmark for Iolaus.
 
 This is intentionally NOT a broad performance benchmark. It measures the one
-failure mode HydraBite claims to solve: a tool reports success while its declared
+failure mode Iolaus claims to solve: a tool reports success while its declared
 world-state postcondition is false.
 
 Requires a live HydraDB OSS node and writes every case as real graph state.
@@ -13,7 +13,7 @@ import json
 import secrets
 from pathlib import Path
 
-from hydrabite import HydraBiteEngine, HydraClient, ReceiptSigner
+from iolaus import IolausEngine, HydraClient, ReceiptSigner
 from demo.scenario import CREATE_CUSTOMER, crm_verifier
 from demo.workspace import DemoWorkspace
 
@@ -30,7 +30,7 @@ def run(output: Path, workspace_path: Path) -> dict:
     if not proof.passed:
         raise RuntimeError(f"HydraDB native probe failed: {proof}")
     ws=DemoWorkspace(workspace_path); ws.reset()
-    engine=HydraBiteEngine(hydra,ReceiptSigner.generate("hydrabite.benchmark"))
+    engine=IolausEngine(hydra,ReceiptSigner.generate("iolaus.benchmark"))
     verifier=crm_verifier(ws)
     records=[]
     naive_false_commits=0
@@ -60,20 +60,20 @@ def run(output: Path, workspace_path: Path) -> dict:
             raise AssertionError((mode,email,hb_commit,graph_claim))
         records.append({
             "case":idx,"mode":mode,"tool_reported_success":naive_commit,"world_postcondition":world_ok,
-            "naive_commit":naive_commit,"hydrabite_status":result.status.value,"hydrabite_commit":hb_commit,
+            "naive_commit":naive_commit,"iolaus_status":result.status.value,"iolaus_commit":hb_commit,
             "graph_claim":graph_claim,"receipt_hash":result.receipt.receipt_hash if result.receipt else None,
         })
 
     metrics={
-        "schema":"hydrabite.false-success-bench.v1",
+        "schema":"iolaus.false-success-bench.v1",
         "cases":len(CASES),
         "semantic_failures":semantic_failures,
         "expected_successes":expected_success,
         "naive_false_success_commits":naive_false_commits,
-        "hydrabite_false_success_commits":hb_false_commits,
+        "iolaus_false_success_commits":hb_false_commits,
         "naive_false_success_commit_rate":naive_false_commits/max(1,semantic_failures),
-        "hydrabite_false_success_commit_rate":hb_false_commits/max(1,semantic_failures),
-        "hydrabite_true_positive_rate":true_positive/max(1,expected_success),
+        "iolaus_false_success_commit_rate":hb_false_commits/max(1,semantic_failures),
+        "iolaus_true_positive_rate":true_positive/max(1,expected_success),
         "hydra_native_proof":proof.model_dump(mode="json"),
         "records":records,
     }

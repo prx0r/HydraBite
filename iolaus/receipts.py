@@ -1,4 +1,4 @@
-"""HydraBite receipts — signed Bite receipts."""
+"""Iolaus receipts — signed Bite receipts."""
 from __future__ import annotations
 import hashlib
 import json

@@ -1,5 +1,5 @@
 import pytest
-from hydrabite.models import Contract
+from iolaus.models import Contract
 
 
 def test_contract_renders_claim_templates_and_hash_is_stable():

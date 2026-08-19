@@ -1,6 +1,6 @@
 import json
-from hydrabite.models import ReceiptPayload, VerifierClass
-from hydrabite.receipts import ReceiptSigner
+from iolaus.models import ReceiptPayload, VerifierClass
+from iolaus.receipts import ReceiptSigner
 
 
 def payload():

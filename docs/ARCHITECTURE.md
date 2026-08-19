@@ -2,7 +2,7 @@
 
 ## One responsibility
 
-HydraBite owns the transition:
+Iolaus owns the transition:
 
 ```text
 UNVERIFIED execution output → VERIFIED shared state
@@ -24,7 +24,7 @@ Declares:
 
 The contract is content-hashed before invocation.
 
-### `HydraBiteEngine.execute`
+### `IolausEngine.execute`
 1. Ensure immutable-ish contract node exists by `(contract_id, contract_hash)`.
 2. Query verified prerequisite claims in HydraDB.
 3. If missing, return `BLOCKED` without calling the tool.
@@ -37,7 +37,7 @@ Crucially, there is no trust promotion here.
 ### `Verifier`
 An independent gate with a stable ID and explicit verifier class. MVP verifier classes distinguish deterministic readback/tests from human, heuristic and cryptographic mechanisms.
 
-### `HydraBiteEngine.verify`
+### `IolausEngine.verify`
 1. Ensure verifier is authorized by the contract.
 2. Run verifier against the declared arguments and observed output.
 3. Hash the evidence.
@@ -72,7 +72,7 @@ That is intentionally downstream of the MVP. The hard prerequisite is ensuring t
 
 ## HydraDB identity / mutation compatibility
 
-The inspected HydraDB OSS revision uses integer vertex IDs as mutation identity and documents a deliberately bounded OpenCypher write subset. HydraBite therefore does not assume Neo4j's broader mutation surface.
+The inspected HydraDB OSS revision uses integer vertex IDs as mutation identity and documents a deliberately bounded OpenCypher write subset. Iolaus therefore does not assume Neo4j's broader mutation surface.
 
 String domain IDs (`inv_…`, `bite_…`, claim keys, verifier IDs) are mapped to deterministic positive 63-bit vertex IDs with SHA-256 domain separation. The readable string remains a node property.
 

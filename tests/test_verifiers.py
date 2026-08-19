@@ -1,5 +1,5 @@
-from hydrabite.models import VerifierClass
-from hydrabite.verifiers import CallableVerifier, JsonSchemaVerifier
+from iolaus.models import VerifierClass
+from iolaus.verifiers import CallableVerifier, JsonSchemaVerifier
 
 
 def test_json_schema_verifier():

@@ -2,7 +2,7 @@
 
 ## Claim being defended
 
-HydraBite claims only:
+Iolaus claims only:
 
 > **For transitions covered by a declared verifier, raw executor output cannot create a trusted `HBClaim`; only an authorized PASS receipt can.**
 
@@ -29,7 +29,7 @@ It does not claim the verifier is omniscient.
 A tiny `RecordingHydra` exists only in `tests/test_engine_logic.py` to test local Python policy. It is neither imported by production code nor accepted by the live certificate. Live tests are in `tests/integration` and hard-fail without HydraDB.
 
 ### Verifier itself is wrong
-Out of scope for universal resolution. HydraBite makes the verifier explicit and therefore replaceable/auditable. Stronger future policies can require quorum, independent re-execution, human approval, TEE/ZK evidence, or domain-specific validators.
+Out of scope for universal resolution. Iolaus makes the verifier explicit and therefore replaceable/auditable. Stronger future policies can require quorum, independent re-execution, human approval, TEE/ZK evidence, or domain-specific validators.
 
 ### Replay / duplicate side effects
 The MVP records input hashes but does not yet implement a distributed idempotency lease. Production extension: contract-level idempotency keys and duplicate suppression before executor dispatch.

@@ -1,6 +1,6 @@
 import math
 import pytest
-from hydrabite.canonical import canonical_bytes, sha256_hex
+from iolaus.canonical import canonical_bytes, sha256_hex
 
 
 def test_canonical_hash_is_order_independent():

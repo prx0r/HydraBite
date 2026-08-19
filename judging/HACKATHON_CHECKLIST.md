@@ -26,4 +26,4 @@ Based on the public Hack Hydra event page reviewed 2026-08-19. The release agent
 
 ## Submission story in one sentence
 
-**HydraDB already helps agents decide what action to take; HydraBite makes execution outcomes earn a verifier receipt before they can become trusted graph state or future learning signal.**
+**HydraDB already helps agents decide what action to take; Iolaus makes execution outcomes earn a verifier receipt before they can become trusted graph state or future learning signal.**

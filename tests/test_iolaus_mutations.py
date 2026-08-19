@@ -1,4 +1,4 @@
-from hydrabite.hydra import HydraClient
+from iolaus.hydra import HydraClient
 
 
 class Capture(HydraClient):

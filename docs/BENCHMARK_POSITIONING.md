@@ -1,6 +1,6 @@
 # Benchmark positioning
 
-HydraDB already publishes serious database/retrieval and function-routing evaluation. HydraBite should **not** submit another sprawling benchmark suite and should not imply its tiny harness competes with Hydra's benchmark work.
+HydraDB already publishes serious database/retrieval and function-routing evaluation. Iolaus should **not** submit another sprawling benchmark suite and should not imply its tiny harness competes with Hydra's benchmark work.
 
 ## Hydra's benchmark questions
 
@@ -14,7 +14,7 @@ Did we select the right function?
 Did the plan execute/complete?
 ```
 
-HydraBite asks a downstream systems question:
+Iolaus asks a downstream systems question:
 
 ```text
 If execution reported success, was the declared effect actually true

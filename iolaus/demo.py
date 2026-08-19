@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""HydraBite Demo — verified state transitions for agentic actions."""
+"""Iolaus Demo — verified state transitions for agentic actions."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from hydrabite.models import Bite, BiteStatus, Contract, VerifierClass
-from hydrabite.canonical import sha256_hex
-from hydrabite.engine import HydraBiteEngine, IntegrityViolation
-from hydrabite.receipts import ReceiptSigner
-from hydrabite.verifiers import CallableVerifier
+from iolaus.models import Bite, BiteStatus, Contract, VerifierClass
+from iolaus.canonical import sha256_hex
+from iolaus.engine import IolausEngine, IntegrityViolation
+from iolaus.receipts import ReceiptSigner
+from iolaus.verifiers import CallableVerifier
 
 
 class MockHydra:
@@ -31,13 +31,13 @@ class MockHydra:
 
 
 print("=" * 60)
-print("  HydraBite — Verified State Transitions")
+print("  Iolaus — Verified State Transitions")
 print("=" * 60)
 
 # Setup with mock (no HydraDB needed)
 hydra = MockHydra()
 signer = ReceiptSigner.generate("demo")
-engine = HydraBiteEngine(hydra, signer)
+engine = IolausEngine(hydra, signer)
 
 contract = Contract(
     contract_id="create_customer",

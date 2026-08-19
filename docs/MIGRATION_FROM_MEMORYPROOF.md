@@ -11,11 +11,11 @@ git checkout -b archive-memoryproof
 # push/tag if desired
 ```
 
-Then create the final HydraBite branch from the desired base.
+Then create the final Iolaus branch from the desired base.
 
 ## Replace judge-facing root
 
-Old material previously observed in the hackathon repository included MemoryProof/WigglyMem messaging plus inherited OpenAIRE Research CI artifacts. Do not leave those alongside HydraBite; it makes the submission look like multiple unrelated products.
+Old material previously observed in the hackathon repository included MemoryProof/WigglyMem messaging plus inherited OpenAIRE Research CI artifacts. Do not leave those alongside Iolaus; it makes the submission look like multiple unrelated products.
 
 Judge-facing canonical files should become:
 
@@ -27,7 +27,7 @@ judging/
 docs/
 research/
 presentation/
-src/hydrabite/
+src/iolaus/
 demo/
 benchmarks/
 tests/
@@ -39,10 +39,10 @@ Archive historical experiments under `legacy/` only if retaining them has real v
 
 ## P0 deletions / replacements
 
-- Replace old `pyproject.toml` project name/entry point with HydraBite.
+- Replace old `pyproject.toml` project name/entry point with Iolaus.
 - Replace demo importing obsolete packages.
-- Remove hosted Hydra MCP as the core backend; HydraBite uses OSS graph-node HTTP.
-- Replace stale build certificate with generated live HydraBite certificate only after certification.
+- Remove hosted Hydra MCP as the core backend; Iolaus uses OSS graph-node HTTP.
+- Replace stale build certificate with generated live Iolaus certificate only after certification.
 - Replace OpenAIRE story/submission/video copy.
 - Replace inherited Research CI tests as the main proof surface.
 
