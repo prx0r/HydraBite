@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patala.dev/schemas/proof-obligation-v1",
+  "title": "Pāṭala ProofObligation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "obligation_id",
+    "analysis_id",
+    "claim_id",
+    "trigger_change_ids",
+    "reason",
+    "action",
+    "status"
+  ],
+  "properties": {
+    "obligation_id": {
+      "type": "string"
+    },
+    "analysis_id": {
+      "type": "string"
+    },
+    "claim_id": {
+      "type": "string"
+    },
+    "trigger_change_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reason": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "resolution_plan_hash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

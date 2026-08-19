@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-08-19T06:21:10Z",
+  "indicators": 10,
+  "actually_changed": 0,
+  "predicted_affected": 0,
+  "precision": 0.0,
+  "recall": 0.0,
+  "recompute_avoided": 1.0,
+  "changes": {},
+  "predictions": {
+    "I1:software-count": false,
+    "I2:publication-count": false,
+    "I3:dataset-count": false,
+    "I4:oa-share": false,
+    "I5:orcid-coverage": false,
+    "I6:doi-coverage": false,
+    "I7:grant-coverage": false,
+    "I8:peer-reviewed-share": false,
+    "I9:software-open-share": false,
+    "I10:mixed-query-count": false
+  }
+}

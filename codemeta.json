@@ -1,0 +1,28 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "P\u0101\u1e6dala Research CI",
+  "description": "Continuous verification for analyses and AI-agent conclusions derived from the evolving OpenAIRE Graph.",
+  "codeRepository": "https://github.com/prx0r/hackathon1",
+  "version": "0.2.0",
+  "dateCreated": "2026-08-19",
+  "license": "https://spdx.org/licenses/MIT",
+  "programmingLanguage": "Python 3",
+  "runtimePlatform": "Python >=3.10",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Tom",
+      "familyName": "Prior",
+      "url": "https://github.com/prx0r"
+    }
+  ],
+  "keywords": [
+    "OpenAIRE",
+    "Open Science",
+    "MCP",
+    "research intelligence",
+    "provenance",
+    "continuous verification"
+  ]
+}

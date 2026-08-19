@@ -1,0 +1,85 @@
+{
+  "trace_id": "mcp:alien-openaire-live-20260819",
+  "stats": {
+    "tool_calls": 11,
+    "unique_entity_ids": 5,
+    "candidate_dependencies": 19,
+    "high_confidence": 0,
+    "low_confidence": 0
+  },
+  "diff": {
+    "added": 10,
+    "removed": 5,
+    "unchanged": 0
+  },
+  "impact": {
+    "affected": 8,
+    "unaffected": 11
+  },
+  "affected_deps": [
+    {
+      "dep_id": "dep:e340079d57a6",
+      "obs_id": "obs:2e820fa8f8f6",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Search Research Products call result",
+      "entity_id": "doi_________::48e8bfa36c8def767f"
+    },
+    {
+      "dep_id": "dep:537ca24b18c2",
+      "obs_id": "obs:2e820fa8f8f6",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Search Research Products call result",
+      "entity_id": "doi_________::55183b2ed391d10578"
+    },
+    {
+      "dep_id": "dep:c8692c1b6951",
+      "obs_id": "obs:2e820fa8f8f6",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Search Research Products call result",
+      "entity_id": "doi_dedup___::25b6bc975c3c7b06cc"
+    },
+    {
+      "dep_id": "dep:1c956b7d6636",
+      "obs_id": "obs:31a09d9c3bfd",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Get Research Product Details call result",
+      "entity_id": "doi_dedup___::25b6bc975c3c7b06cc"
+    },
+    {
+      "dep_id": "dep:59282f6b4965",
+      "obs_id": "obs:1ccada2ad219",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Get Research Product Details call result",
+      "entity_id": "doi_________::48e8bfa36c8def767f"
+    },
+    {
+      "dep_id": "dep:5cbaf75e1ee5",
+      "obs_id": "obs:5612ea10e530",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Get Research Product Details call result",
+      "entity_id": "doi_________::3d12f465bd02812486"
+    },
+    {
+      "dep_id": "dep:b22dcc18590e",
+      "obs_id": "obs:dde829e5103d",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Get Research Product Details call result",
+      "entity_id": "doi_________::fb57a6ae301f7de69b"
+    },
+    {
+      "dep_id": "dep:2469033efd5a",
+      "obs_id": "obs:7e33ce0a717a",
+      "dep_kind": "entity",
+      "confidence": 0.5,
+      "evidence": "extracted from Get Research Product Details call result",
+      "entity_id": "doi_________::fb57a6ae301f7de69b"
+    }
+  ]
+}

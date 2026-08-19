@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use Pāṭala Research CI, please cite this software."
+title: "Pāṭala Research CI: Continuous Verification for AI-Native Open Science"
+type: software
+version: 0.2.0
+date-released: 2026-08-19
+authors:
+  - family-names: Prior
+    given-names: Tom
+    alias: prx0r
+repository-code: "https://github.com/prx0r/hackathon1"
+url: "https://github.com/prx0r/hackathon1"
+license: MIT
+keywords:
+  - OpenAIRE
+  - Open Science
+  - Model Context Protocol
+  - research intelligence
+  - provenance
+  - continuous verification
+abstract: >-
+  A dependency-aware verification layer that records OpenAIRE/Alien MCP evidence,
+  snapshots the corresponding OpenAIRE Graph state, detects material upstream
+  changes, identifies affected downstream claims, and emits auditable proof
+  obligations and verification receipts.

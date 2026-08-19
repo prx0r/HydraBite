@@ -1,0 +1,157 @@
+[
+  {
+    "indicator_id": "I1:software-production",
+    "name": "Software production count",
+    "source": "OpenAIRE MONITOR",
+    "metric": "count",
+    "query": {"type": "software", "pageSize": 1},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:software"}
+    ],
+    "compute": "count"
+  },
+  {
+    "indicator_id": "I2:software-linked-to-publications",
+    "name": "Software linked to publications (ScholeXplorer)",
+    "source": "OpenAIRE MONITOR",
+    "metric": "count_with_relation",
+    "query": {"type": "software", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:software"},
+      {"kind": "relation", "relation_type": "IsRelatedTo", "source_type": "publication", "target_type": "software"},
+      {"kind": "relation", "relation_type": "Cites", "source_type": "publication", "target_type": "software"}
+    ],
+    "compute": "count_with_relation",
+    "relation_types": ["IsRelatedTo", "Cites"]
+  },
+  {
+    "indicator_id": "I3:publications-with-orcid",
+    "name": "Publications with ORCID",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "publication", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:publication"},
+      {"kind": "field", "field_pattern": "authors.*pid.*orcid"}
+    ],
+    "compute": "share_with_field",
+    "field_pattern": "authors.*pid.*orcid"
+  },
+  {
+    "indicator_id": "I4:grant-supported-publications",
+    "name": "Grant-supported publications",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "publication", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:publication"},
+      {"kind": "relation", "relation_type": "HasPart", "source_type": "project", "target_type": "publication"}
+    ],
+    "compute": "share_with_relation",
+    "relation_type": "HasPart"
+  },
+  {
+    "indicator_id": "I5:oa-publication-share",
+    "name": "Open-access publication share",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "publication", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:publication"},
+      {"kind": "field", "field_pattern": "access_right"}
+    ],
+    "compute": "share_with_value",
+    "field_path": "access_right",
+    "target_value": "OPEN"
+  },
+  {
+    "indicator_id": "I6:dataset-production",
+    "name": "Dataset production count",
+    "source": "OpenAIRE MONITOR",
+    "metric": "count",
+    "query": {"type": "dataset", "pageSize": 1},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:dataset"}
+    ],
+    "compute": "count"
+  },
+  {
+    "indicator_id": "I7:publications-with-doi",
+    "name": "Publications with DOI",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "publication", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:publication"},
+      {"kind": "field", "field_pattern": "pids.*doi"}
+    ],
+    "compute": "share_with_field",
+    "field_pattern": "pids.*doi"
+  },
+  {
+    "indicator_id": "I8:peer-reviewed-share",
+    "name": "Peer-reviewed publication share",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "publication", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:publication"},
+      {"kind": "field", "field_pattern": "is_peer_reviewed"}
+    ],
+    "compute": "share_with_value",
+    "field_path": "is_peer_reviewed",
+    "target_value": true
+  },
+  {
+    "indicator_id": "I9:publication-count",
+    "name": "Publication count (total)",
+    "source": "OpenAIRE MONITOR",
+    "metric": "count",
+    "query": {"type": "publication", "pageSize": 1},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:publication"}
+    ],
+    "compute": "count"
+  },
+  {
+    "indicator_id": "I10:datasets-with-pid",
+    "name": "Datasets with PID",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "dataset", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:dataset"},
+      {"kind": "field", "field_pattern": "pids.*"}
+    ],
+    "compute": "share_with_field",
+    "field_pattern": "pids.*"
+  },
+  {
+    "indicator_id": "I11:international-collaboration",
+    "name": "International collaboration (multiple countries)",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "publication", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:publication"},
+      {"kind": "field", "field_pattern": "countries"}
+    ],
+    "compute": "share_multi_value",
+    "field_path": "countries",
+    "min_values": 2
+  },
+  {
+    "indicator_id": "I12:open-source-software-share",
+    "name": "Open-source software share",
+    "source": "OpenAIRE MONITOR",
+    "metric": "share",
+    "query": {"type": "software", "pageSize": 50},
+    "dependencies": [
+      {"kind": "query_membership", "query_key": "type:software"},
+      {"kind": "field", "field_pattern": "access_right"}
+    ],
+    "compute": "share_with_value",
+    "field_path": "access_right",
+    "target_value": "OPEN"
+  }
+]

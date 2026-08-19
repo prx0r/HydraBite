@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patala.dev/schemas/verification-receipt-v1",
+  "title": "Pāṭala VerificationReceipt v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "receipt_id",
+    "obligation_id",
+    "plan_hash",
+    "subject_binding",
+    "checks",
+    "artifacts",
+    "status",
+    "receipt_hash"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string"
+    },
+    "obligation_id": {
+      "type": "string"
+    },
+    "plan_hash": {
+      "type": "string"
+    },
+    "subject_binding": {
+      "type": "object"
+    },
+    "checks": {
+      "type": "array"
+    },
+    "artifacts": {
+      "type": "array"
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "finished_at": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "object"
+    },
+    "receipt_hash": {
+      "type": "string"
+    }
+  }
+}

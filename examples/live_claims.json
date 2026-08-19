@@ -1,0 +1,10 @@
+{
+  "claims": [
+    {
+      "claim_id": "claim:result-population",
+      "text": "The tracked OpenAIRE result population remains stable enough to reuse this analysis.",
+      "dependencies": [{"kind": "query_membership"}],
+      "computation": {"type": "count", "operator": ">=", "threshold": 1}
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patala.dev/schemas/tracked-claim-v1",
+  "title": "Pāṭala TrackedClaim v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id",
+    "text",
+    "dependencies",
+    "state"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "baseline_value": {},
+    "baseline_supported": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "computation": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "entity",
+              "field",
+              "relation",
+              "query_membership"
+            ]
+          },
+          "entity_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "field_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "relation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

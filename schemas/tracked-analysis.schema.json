@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patala.dev/schemas/tracked-analysis-v1",
+  "title": "Pāṭala TrackedAnalysis v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "analysis_id",
+    "title",
+    "query",
+    "created_at",
+    "latest_snapshot_id",
+    "claims"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "latest_snapshot_id": {
+      "type": "string"
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "query": {
+      "type": "object",
+      "required": [
+        "entity",
+        "api_version"
+      ],
+      "properties": {
+        "entity": {
+          "type": "string"
+        },
+        "search": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "filters": {
+          "type": "object"
+        },
+        "api_version": {
+          "enum": [
+            "v3",
+            "v4"
+          ]
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_pages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "include_scholexplorer": {
+          "type": "boolean"
+        },
+        "scholexplorer_relation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "select": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
